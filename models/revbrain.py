@@ -3,13 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from models.causal_conv import CausalConvNet
-from models.base import BaseModel
-
-
-class EEGPredictor(BaseModel):
-
-    def _build_model(self):
-        return REVBrain(**self.config)
 
 
 class REVBrain(nn.Module):
@@ -159,3 +152,6 @@ class MlpBlock(nn.Module):
         out = self.linears[-1](z)
 
         return out, embed_ys
+
+
+MODEL_CLASS = REVBrain

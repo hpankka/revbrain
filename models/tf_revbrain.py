@@ -5,13 +5,6 @@ from torch.nn import TransformerEncoderLayer, TransformerEncoder
 
 from utils.model_utils import causal_attn_mask
 from models.causal_conv import CausalConvNet
-from models.base import BaseModel
-
-
-class EEGPredictor(BaseModel):
-
-    def _build_model(self):
-        return TfREVBrain(**self.config)
 
 
 class TfREVBrain(nn.Module):
@@ -151,3 +144,6 @@ class TfREVBrain(nn.Module):
                 out = torch.cat((out, cur_indices), dim=0)
 
             return torch.squeeze(out, dim=1)
+
+
+MODEL_CLASS = TfREVBrain

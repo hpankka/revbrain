@@ -6,13 +6,6 @@ import torch.nn.functional as F
 
 from utils.data_utils import mu_law_quantize, dequantize, inverse_mu_law
 from models.causal_conv import CausalConvNet
-from models.base import BaseModel
-
-
-class EEGPredictor(BaseModel):
-
-    def _build_model(self):
-        return Wavenet(**self.config)
 
 
 class Wavenet(nn.Module):
@@ -31,6 +24,8 @@ class Wavenet(nn.Module):
                                 n_blocks,
                                 out_channels=128,
                                 device=device).to(device)
+        
+        self.receptive_field_size = self.cc.receptive_field_size
         
         self.out = nn.Conv1d(in_channels=128, out_channels=256, kernel_size=1)
 
@@ -68,11 +63,9 @@ class Wavenet(nn.Module):
                 warnings.warn("n_samples > 1 with sampling=False produces identical predictions. " \
                 "Set sampling=True or n_samples=1 to avoid unnecessary computation.")
 
-            rf = self.cc.receptive_field_size
-
             for i in range(len_y):
                 # Get logits
-                z = self.cc(x[:, :, -rf:])
+                z = self.cc(x[:, :, -self.receptive_field_size:])
                 logits = self.out(z)  # (n, 256, 1)
 
                 # Sample
@@ -97,3 +90,6 @@ class Wavenet(nn.Module):
             y *= 100  # back to [-100, 100]
 
             return y
+
+
+MODEL_CLASS = Wavenet

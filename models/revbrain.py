@@ -9,9 +9,9 @@ class REVBrain(nn.Module):
     def __init__(self,
                  M,                 # Number of codebook levels
                  N,                 # Codebook size
-                 enc_channels,      # Intermediate channels in Wavenet-encoder
+                 enc_channels,      # Intermediate channels in encoder
                  enc_kernel,        # Encoder kernel size
-                 enc_blocks,        # Number of Wavenet blocks in the encoder
+                 enc_blocks,        # Number of convolution blocks in the encoder
                  z_dim,             # Dimension of the input representation
                  embedding_dim,     # Codebook index embedding size
                  mlp_hidden_dim,    # Dimension of MLP hidden
@@ -50,14 +50,14 @@ class REVBrain(nn.Module):
 
         Params:
         x: Inputs of shape (batch, 1, len_x)
-        targets: Targets for teacher forcing during training, shape (batch, M*len_train_target)
+        targets: Targets for teacher forcing during training, shape (batch, M, len_train_target)
                 For correct train behavior, make sure len_train_target=len_x-receptive_field_size+1
         tf_with_eval: set to True, when eval-mode should run with teacher forcing (e.g. validation step)
         sampling: Used during eval mode. If set to True, indices are sampled from the output distribution,
                 otherwise the index with the highest probability is drawn
         n_samples: Used during eval mode. Indicates how many samples per input should be drawn
 
-        return: Train mode: output logits of each MLP block, shape (batch, N, M*len_train_target)
+        return: Train mode: output logits of each MLP block, shape (batch, N, M, len_train_target)
                 Eval mode: predicted codebook indexes of each MLP block, shape (batch*n_samples*M)
         """
 
@@ -65,18 +65,16 @@ class REVBrain(nn.Module):
 
         if self.training or tf_with_eval:
             assert targets is not None, 'Targets must be provided in train-mode'
-
-            targets = targets.view(batch_size, self.M, -1)
             
             # Encoder
             z = self.encoder(x)
 
             # Head
             embedded_ys = torch.empty(batch_size, 0, targets.shape[2]).to(self.device)
-            out = torch.empty(batch_size, self.N, 0).to(self.device)
+            out = torch.empty(batch_size, self.N, 0, targets.shape[2]).to(self.device)
             for m, mlp_ in enumerate(self.mlp_blocks):
                 out_mlp, embedded_ys = mlp_(z, targets[:, m-1], embedded_ys)
-                out = torch.cat((out, out_mlp), dim=2)
+                out = torch.cat((out, out_mlp.unsqueeze(2)), dim=2)
 
             return out
         else:

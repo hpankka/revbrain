@@ -12,9 +12,9 @@ class TfREVBrain(nn.Module):
     def __init__(self,
                  M,                     # Number of codebook levels
                  N,                     # Codebook size
-                 enc_channels,          # Intermediate channels in Wavenet-encoder
+                 enc_channels,          # Intermediate channels in encoder
                  enc_kernel,            # Encoder kernel size
-                 enc_blocks,            # Number of Wavenet blocks in the encoder
+                 enc_blocks,            # Number of convolution blocks in the encoder
                  d_model,               # Model dimension
                  n_head,                # Number of Transformer heads
                  n_transformer_layers,  # Number of Transformer layers
@@ -62,14 +62,14 @@ class TfREVBrain(nn.Module):
 
         Params:
         x: Inputs of shape (batch, 1, len_x)
-        targets: Targets for teacher forcing during training, shape (batch, M*len_train_target)
+        targets: Targets for teacher forcing during training, shape (batch, M, len_train_target)
                 For correct train behavior, make sure len_train_target=len_x-receptive_field_size+1
         tf_with_eval: set to True, when eval-mode should run with teacher forcing (e.g. validation step)
         sampling: Used during eval mode. If set to True, indices are sampled from the output distribution,
                 otherwise the index with the highest probability is drawn
         n_samples: Used during eval mode. Indicates how many samples per input should be drawn
 
-        return: Train mode: output logits of each MLP block, shape (batch, N, M*len_train_target)
+        return: Train mode: output logits of each MLP block, shape (batch, N, M, len_train_target)
                 Eval mode: predicted codebook indexes of each MLP block, shape (batch*n_samples*M)
         """
 
@@ -83,7 +83,6 @@ class TfREVBrain(nn.Module):
 
             # Reshape
             z = z.permute(0, 2, 1).reshape(-1, 1, self.d_model)  # (n*len_target, 1, d_model)
-            targets = targets.view(batch_size, self.M, -1)  # (n, M, len_target)
             targets = targets.permute(0, 2, 1).reshape(-1, self.M)  # (n*len_target, M)
 
             # Embed targets and concat to z
@@ -103,7 +102,6 @@ class TfREVBrain(nn.Module):
 
             # Reshape
             out = out.view(batch_size, -1, self.M, self.N).permute(0, 3, 2, 1)  # (n, N, M, len_target)
-            out = out.reshape(batch_size, self.N, -1)  # (n, N, M*len_target)
 
             return out
 

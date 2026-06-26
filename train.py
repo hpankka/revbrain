@@ -3,8 +3,6 @@ import os
 import argparse
 import json
 
-import torch
-
 from utils.model_utils import get_model
 from utils.data_utils import get_dataloaders_for_training
 from utils.training_utils import validate_training_args, RVQ_MODELS

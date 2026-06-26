@@ -33,18 +33,20 @@ class Wavenet(nn.Module):
 
     def forward(self,
                 x,
+                return_logits_with_eval=False,
                 len_y=1,
                 sampling=True,
                 n_samples=1):
         """
         Params:
         x: Inputs of shape (batch, 1, len_x). Values are expected to be [-100, 100]
+        return_logits_with_eval: set to True to return logits during eval (e.g. for validation loss)
         len_y: Used during eval mode. Tells how long the generated forecast should be
         sampling: Used during eval mode. If set to True, next time step is sampled from the
                 output distribution, otherwise the index with the highest probability is drawn
         n_samples: Used during eval mode. Indicates how many samples per input should be drawn
 
-        return: Train mode: output logits over the next time step, shape (batch, 256, len_x-rf+1)
+        return: Train mode: output logits, shape (batch, 256, len_x-rf+1)
                 Eval mode: predicted next len_y time steps, shape (batch*n_samples, len_y)
         """
 
@@ -53,7 +55,7 @@ class Wavenet(nn.Module):
         x = mu_law_quantize(x)
         x = dequantize(x)
 
-        if self.training:
+        if self.training or return_logits_with_eval:
 
             z = self.cc(x)
             out = self.out(z)

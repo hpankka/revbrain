@@ -32,13 +32,13 @@ class TfREVBrain(nn.Module):
                                      kernel_size=enc_kernel,
                                      n_blocks=enc_blocks,
                                      out_channels=d_model,
-                                     device=device).to(device)
+                                     device=device)
         self.receptive_field_size = self.encoder.receptive_field_size
 
         self.embeddings = nn.ModuleList([nn.Embedding(num_embeddings=N,
                                                       embedding_dim=d_model)
                                         for m in range(M-1)])
-        
+
         transformer_layer = TransformerEncoderLayer(d_model=d_model,
                                                     nhead=n_head,
                                                     dim_feedforward=d_transformer_ff,
@@ -47,6 +47,8 @@ class TfREVBrain(nn.Module):
                                               num_layers=n_transformer_layers)
 
         self.linears = nn.ModuleList([nn.Linear(in_features=d_model, out_features=N) for m in range(M)])
+
+        self.to(device)
 
     def forward(self,
                 x,

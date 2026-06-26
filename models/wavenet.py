@@ -23,11 +23,13 @@ class Wavenet(nn.Module):
                                 kernel_size,
                                 n_blocks,
                                 out_channels=128,
-                                device=device).to(device)
-        
+                                device=device)
+
         self.receptive_field_size = self.cc.receptive_field_size
-        
+
         self.out = nn.Conv1d(in_channels=128, out_channels=256, kernel_size=1)
+
+        self.to(device)
 
     def forward(self,
                 x,

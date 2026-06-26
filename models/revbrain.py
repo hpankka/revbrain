@@ -27,14 +27,16 @@ class REVBrain(nn.Module):
                                      kernel_size=enc_kernel,
                                      n_blocks=enc_blocks,
                                      out_channels=z_dim,
-                                     device=device).to(device)
+                                     device=device)
         self.receptive_field_size = self.encoder.receptive_field_size
 
         self.mlp_blocks = nn.ModuleList([MlpBlock(N,
                                                   embedding_dim,
                                                   z_dim,
                                                   mlp_hidden_dim,
-                                                  quantization_level=m).to(device) for m in range(M)])
+                                                  quantization_level=m) for m in range(M)])
+
+        self.to(device)
 
     def forward(self,
                 x,

@@ -1,8 +1,10 @@
 import os
+import warnings
 import json
 import importlib
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 
 RVQ_MODELS = {'revbrain', 'tf_revbrain'}
 
@@ -35,6 +37,11 @@ def validate_training_args(args):
         raise ValueError(f'n_train_samples ({args.n_train_samples}) must be >= batch_size ({args.batch_size})')
     if args.n_val_samples < args.batch_size:
         raise ValueError(f'n_val_samples ({args.n_val_samples}) must be >= batch_size ({args.batch_size})')
+    if args.device=='cuda' and not torch.cuda.is_available():
+        args.device='cpu'
+        warnings.warn('CUDA not available, falling back to CPU', UserWarning)
+    if args.device=='cpu':
+        warnings.warn('CPU not recommended for training', UserWarning)
 
 def check_data_type(path, is_rvq):
     meta_path = path.replace('.pt', '_meta_data.json')

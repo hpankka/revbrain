@@ -223,11 +223,11 @@ def get_data_loader_tokenized_y(file_path, len_x, len_target, batch_size, n_samp
 def get_dataloaders_for_training(args, len_target, is_rvq_model):
     data_class = EEGDataTokenizedY if is_rvq_model else EEGDataOverlapY
 
-    def _loader(file_, n_samples):
+    def _loader(file_, n_samples, batch_size):
         dataset = data_class(file_, args.len_x, len_target)
-        return define_loader(dataset, args.batch_size, n_samples)
+        return define_loader(dataset, batch_size, n_samples)
     
-    train_loader = _loader(args.train_data_source, args.n_train_samples)
-    val_loader = _loader(args.val_data_source, args.n_val_samples)
+    train_loader = _loader(args.train_data_source, args.n_train_samples, args.batch_size)
+    val_loader = _loader(args.val_data_source, args.n_val_samples, args.val_batch_size)
 
     return train_loader, val_loader

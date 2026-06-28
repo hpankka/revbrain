@@ -1,3 +1,5 @@
+import os
+import json
 import importlib
 import torch
 
@@ -21,6 +23,17 @@ def get_model(config):
         raise ImportError(f"Could not find model file for '{model_name}'. Ensure models/{model_name}.py exists.") from e
     except AttributeError as e:
         raise AttributeError(f"Module '{model_name}' does not define a 'MODEL_CLASS' attribute.") from e
+    
+def load_run(run_dir, device):
+    with open(os.path.join(run_dir, 'training_config.json')) as f:
+        config = json.load(f)
+    config['device'] = device
+    model = get_model(config)
+    model.load_state_dict(
+        torch.load(os.path.join(run_dir, 'model.pth'),
+                   map_location=torch.device(device))
+    )
+    return model, config
 
 
 # ----------Causal conv related----------

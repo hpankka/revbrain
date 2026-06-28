@@ -36,6 +36,34 @@ def load_run(run_dir, device):
     return model, config
 
 
+# ----------Inference----------
+
+def run_rvq_inference(model, x, codebooks, n_samples, sampling, in_relat_enc):
+    """
+    Params:
+    x: input to model, shape (batch, 1, len)
+    codebooks: long tensor containing codebooks, shape (M, N, len_y)
+    n_samples: how many samples to create per input
+    
+    return: predictions of shape (batch, n_samples, len_y)
+    """
+
+    # model inference
+    indxs = model(x, n_samples=n_samples, sampling=sampling)  # (M, n_samples*batch)
+
+    # get codebook entries based on predicted indices
+    indxs = indxs.unsqueeze(-1).expand(-1, -1, codebooks.shape[2])
+    predictions = torch.gather(codebooks, dim=1, index=indxs)  # (M, batch*n_samples, len_y)
+
+    # sum cb layers and add back input relative encoding value
+    predictions = torch.sum(predictions, dim=0)  # (batch*n_samples, len_y)
+    predictions = predictions.view(-1, n_samples, predictions.shape[1])
+    if in_relat_enc:
+        predictions = predictions + x[:, :, -1:]
+
+    return predictions
+
+
 # ----------Causal conv related----------
 
 def dilation(layer_number):

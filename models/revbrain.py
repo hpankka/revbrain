@@ -60,7 +60,7 @@ class REVBrain(nn.Module):
         n_samples: Used during eval mode. Indicates how many samples per input should be drawn
 
         return: Train mode: output logits of each MLP block, shape (batch, N, M, len_train_target)
-                Eval mode: predicted codebook indexes of each MLP block, shape (batch*n_samples*M)
+                Eval mode: predicted codebook indexes of each MLP block, shape (M, n_samples*batch)
         """
 
         batch_size = x.shape[0]
@@ -85,7 +85,7 @@ class REVBrain(nn.Module):
             z = self.encoder(x[:, :, -self.receptive_field_size:])  # (n, N, 1)
 
             embedded_ys = torch.empty(batch_size, 0, 1).to(self.device)
-            out = torch.empty(0, 1, dtype=torch.long).to(self.device)
+            out = torch.empty(batch_size, 0, dtype=torch.long).to(self.device)
             cur_indices = torch.empty(batch_size, 1, dtype=torch.long).to(self.device)
             for m, mlp_ in enumerate(self.mlp_blocks):
                 # Get logits
@@ -104,9 +104,9 @@ class REVBrain(nn.Module):
                     cur_indices = torch.argmax(out_mlp, dim=1, keepdim=True)
                 
                 # Gather outputs
-                out = torch.cat((out, cur_indices), dim=0)
+                out = torch.cat((out, cur_indices), dim=1)
             
-            return torch.squeeze(out, dim=1)
+            return out.T
 
 
 class MlpBlock(nn.Module):

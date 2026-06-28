@@ -72,7 +72,7 @@ class TfREVBrain(nn.Module):
         n_samples: Used during eval mode. Indicates how many samples per input should be drawn
 
         return: Train mode: output logits of each MLP block, shape (batch, N, M, len_train_target)
-                Eval mode: predicted codebook indexes of each MLP block, shape (batch*n_samples*M)
+                Eval mode: predicted codebook indexes of each MLP block, shape (M, n_samples*batch)
         """
 
         batch_size = x.shape[0]
@@ -115,17 +115,16 @@ class TfREVBrain(nn.Module):
             z = z.permute(0, 2, 1)  # (n, 1, d_model)
 
             # Head
-            out = torch.empty(0, 1, dtype=torch.long).to(self.device)
+            out = torch.empty(batch_size, 0, dtype=torch.long).to(self.device)
             for m in range(self.M):
                 if m > 0:
                     # Embed and concatenate predicted tokens
-                    s = (m-1)*batch_size
-                    y = self.embeddings[m-1](out[s:s+batch_size])  # (n, 1, d_model)
+                    y = self.embeddings[m-1](out[:, m-1:m])  # (n, 1, d_model)
                     z = torch.cat((z, y), dim=1)
 
                 # Get logits
                 mask=causal_attn_mask(m+1, device=self.device)
-                out_tf = self.transformer(z, mask=mask, is_causal=True)  # (n, 1, d_model)
+                out_tf = self.transformer(z, mask=mask, is_causal=True)  # (n, m, d_model)
                 out_tf = self.linears[m](out_tf[:, m])  # (n, cb_size)
 
                 # Sample
@@ -136,14 +135,14 @@ class TfREVBrain(nn.Module):
                     out_tf = out_tf.repeat_interleave(n_samples, dim=0)
                     
                 if sampling:
-                    cur_indices = torch.multinomial(out_tf, num_samples=1)  # torch.int64, (batch_size, 1)
+                    cur_indices = torch.multinomial(out_tf, num_samples=1)  # (n, 1)
                 else:
                     cur_indices = torch.argmax(out_tf, dim=1, keepdim=True)
                 
                 # Gather outputs
-                out = torch.cat((out, cur_indices), dim=0)
+                out = torch.cat((out, cur_indices), dim=1)
 
-            return torch.squeeze(out, dim=1)
+            return out.T
 
 
 MODEL_CLASS = TfREVBrain

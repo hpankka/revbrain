@@ -6,9 +6,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-RVQ_MODELS = {'revbrain', 'tf_revbrain'}
-
-
 # ----------General----------
 
 def get_train_steps(is_rvq):
@@ -27,8 +24,7 @@ def get_train_steps(is_rvq):
 
 # ----------Argument validation----------
 
-def validate_training_args(args):
-    is_rvq = args.model in RVQ_MODELS
+def validate_training_args(args, is_rvq):
     check_data_type(args.train_data_source, is_rvq)
     check_data_type(args.val_data_source, is_rvq)
     if os.path.exists(args.run_dir):

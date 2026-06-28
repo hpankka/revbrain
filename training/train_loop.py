@@ -5,7 +5,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from utils.training_utils import get_train_steps, save_and_plot_losses, RVQ_MODELS
+from utils.model_utils import RVQ_MODELS
+from utils.training_utils import get_train_steps, save_and_plot_losses
 
 
 def train_loop(model, data_loaders, config, dir_):

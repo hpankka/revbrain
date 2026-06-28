@@ -3,9 +3,9 @@ import os
 import argparse
 import json
 
-from utils.model_utils import get_model
+from utils.model_utils import get_model, RVQ_MODELS
 from utils.data_utils import get_dataloaders_for_training
-from utils.training_utils import validate_training_args, RVQ_MODELS
+from utils.training_utils import validate_training_args
 from training.train_loop import train_loop
 
 
@@ -65,8 +65,8 @@ def setup_training_config(args):
 
 
 def launch_training(args):
-
-    validate_training_args(args)
+    is_rvq = args.model in RVQ_MODELS
+    validate_training_args(args, is_rvq)
 
     # Set up and save training config
     config = setup_training_config(args)
@@ -85,7 +85,7 @@ def launch_training(args):
 
     # Set up data loaders
     len_target = args.len_x - rf + 1
-    data_loaders = get_dataloaders_for_training(args, len_target, args.model in RVQ_MODELS)
+    data_loaders = get_dataloaders_for_training(args, len_target, is_rvq)
     
     # Launch training
     print(f"Training model {args.model}...\n")

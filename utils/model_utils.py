@@ -4,6 +4,8 @@ import torch
 
 # ----------General----------
 
+RVQ_MODELS = {'revbrain', 'tf_revbrain'}
+
 def get_model(config):
     """
     Dynamically imports the model module and instantiates the class.

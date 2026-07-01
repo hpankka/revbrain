@@ -80,6 +80,11 @@ def load_codebooks(cb_dir):
 
     return cb_models, meta
 
+def get_codebooks_tensor(cb_dir):
+    cb_models, meta = load_codebooks(cb_dir)
+    codebooks = [torch.from_numpy(cb_model.cluster_centers_) for cb_model in cb_models]
+    return torch.stack(codebooks, dim=0), meta
+
 def vector_quantize(cb_model, y):
     ind = cb_model.predict(y)
     codebook = cb_model.cluster_centers_

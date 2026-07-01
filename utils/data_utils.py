@@ -196,10 +196,11 @@ class RandomSampler(Sampler):
     def __len__(self):
         return self.subset_size
     
-def define_loader(dataset, batch_size, n_samples):
-    return DataLoader(dataset, batch_size=batch_size, drop_last=True, sampler=RandomSampler(dataset, n_samples))
+def define_loader(dataset, batch_size, n_samples, drop_last=True):
+    return DataLoader(dataset, batch_size=batch_size, drop_last=drop_last,
+                      sampler=RandomSampler(dataset, n_samples))
     
-def get_data_loader(file_path, len_x, len_y, batch_size, n_samples):
+def get_data_loader(file_path, len_x, len_y, batch_size, n_samples, drop_last=True):
     """
     Params:
     file_path: path to preprocessed data
@@ -210,7 +211,7 @@ def get_data_loader(file_path, len_x, len_y, batch_size, n_samples):
     """
     dataset = EEGData(file_path, len_x, len_y)
 
-    return define_loader(dataset, batch_size, n_samples)
+    return define_loader(dataset, batch_size, n_samples, drop_last)
 
 def get_data_loader_tokenized_y(file_path, len_x, len_target, batch_size, n_samples):
     """

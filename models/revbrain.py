@@ -73,23 +73,22 @@ class REVBrain(nn.Module):
 
             # Head
             embedded_ys = torch.empty(batch_size, 0, targets.shape[2]).to(self.device)
-            out = torch.empty(batch_size, self.N, 0, targets.shape[2]).to(self.device)
+            out = []
             for m, mlp_ in enumerate(self.mlp_blocks):
                 out_mlp, embedded_ys = mlp_(z, targets[:, m-1], embedded_ys)
-                out = torch.cat((out, out_mlp.unsqueeze(2)), dim=2)
+                out.append(out_mlp)
 
-            return out
+            return torch.stack(out, dim=2)  # (n, N, M, len_train_target)
         else:
             batch_size *= n_samples
 
             z = self.encoder(x[:, :, -self.receptive_field_size:])  # (n, N, 1)
 
             embedded_ys = torch.empty(batch_size, 0, 1).to(self.device)
-            out = torch.empty(batch_size, 0, dtype=torch.long).to(self.device)
-            cur_indices = torch.empty(batch_size, 1, dtype=torch.long).to(self.device)
+            out = [torch.empty(batch_size, 0, dtype=torch.long).to(self.device)]
             for m, mlp_ in enumerate(self.mlp_blocks):
                 # Get logits
-                out_mlp, embedded_ys = mlp_(z, cur_indices, embedded_ys)
+                out_mlp, embedded_ys = mlp_(z, out[-1], embedded_ys)
 
                 # Sample
                 out_mlp = F.softmax(out_mlp[:, :, -1], dim=1)  # (n, N)
@@ -104,9 +103,9 @@ class REVBrain(nn.Module):
                     cur_indices = torch.argmax(out_mlp, dim=1, keepdim=True)
                 
                 # Gather outputs
-                out = torch.cat((out, cur_indices), dim=1)
+                out.append(cur_indices)
             
-            return out.T
+            return torch.cat(out, dim=1).T
 
 
 class MlpBlock(nn.Module):

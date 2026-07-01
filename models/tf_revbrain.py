@@ -88,19 +88,14 @@ class TfREVBrain(nn.Module):
             targets = targets.permute(0, 2, 1).reshape(-1, self.M)  # (n*len_target, M)
 
             # Embed targets and concat to z
-            for m, embedding in enumerate(self.embeddings):
-                y = embedding(targets[:, m:m+1])  # (n*len_target, 1, d_model)
-                z = torch.cat((z, y), dim=1)  # (n*len_target, M, d_model)
+            z = torch.cat([z] + [emb(targets[:, m:m+1]) for m, emb in enumerate(self.embeddings)], dim=1)
 
             # Head (Transformer)
             mask = causal_attn_mask(self.M, device=self.device)
             z = self.transformer(z, mask=mask, is_causal=True)  # (n*len_target, M, d_model)
 
             # Final linears
-            out = torch.empty(z.shape[0], 0, self.N).to(self.device)
-            for i, fc in enumerate(self.linears):
-                fc_out = fc(z[:, i:i+1])  # (n*len_target, 1, N)
-                out = torch.cat((out, fc_out), dim=1)  # (n*len_target, M, N)
+            out = torch.cat([fc(z[:, i:i+1]) for i, fc in enumerate(self.linears)], dim=1)  # (n*len_target, M, N)
 
             # Reshape
             out = out.view(batch_size, -1, self.M, self.N).permute(0, 3, 2, 1)  # (n, N, M, len_target)
@@ -115,11 +110,11 @@ class TfREVBrain(nn.Module):
             z = z.permute(0, 2, 1)  # (n, 1, d_model)
 
             # Head
-            out = torch.empty(batch_size, 0, dtype=torch.long).to(self.device)
+            out = []
             for m in range(self.M):
                 if m > 0:
                     # Embed and concatenate predicted tokens
-                    y = self.embeddings[m-1](out[:, m-1:m])  # (n, 1, d_model)
+                    y = self.embeddings[m-1](out[-1])  # (n, 1, d_model)
                     z = torch.cat((z, y), dim=1)
 
                 # Get logits
@@ -140,9 +135,9 @@ class TfREVBrain(nn.Module):
                     cur_indices = torch.argmax(out_tf, dim=1, keepdim=True)
                 
                 # Gather outputs
-                out = torch.cat((out, cur_indices), dim=1)
+                out.append(cur_indices)
 
-            return out.T
+            return torch.cat(out, dim=1).T
 
 
 MODEL_CLASS = TfREVBrain

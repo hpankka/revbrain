@@ -115,7 +115,7 @@ if __name__ == "__main__":
     parser.add_argument('--device', type=str, default='cuda', help='Device to train on')
     parser.add_argument('--len_x', type=int, default=2000, help='Input length')
     parser.add_argument('--n_train_samples', type=int, default=50_000, help='Number of training samples to be used per epoch')
-    parser.add_argument('--n_val_samples', type=int, default=10_000, help='Number of validatin samples to be used per epoch')
+    parser.add_argument('--n_val_samples', type=int, default=10_000, help='Number of validation samples to be used per epoch')
     parser.add_argument('--batch_size', type=int, default=32, help='Training batch size')
     parser.add_argument('--val_batch_size', type=int, default=500, help='Validation batch size')
     parser.add_argument('--epochs', type=int, default=500, help='Number of epochs to train')

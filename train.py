@@ -3,10 +3,16 @@ import os
 import argparse
 import json
 
+import torch
+
 from utils.model_utils import get_model, RVQ_MODELS
 from utils.data_utils import get_dataloaders_for_training
 from utils.training_utils import validate_training_args
 from training.train_loop import train_loop
+
+torch.set_float32_matmul_precision('high')      # enables TF32 for matmuls
+torch.backends.cuda.matmul.allow_tf32 = True    # cuBLAS/cuBLASLt gate
+torch.backends.cudnn.allow_tf32 = True          # cuDNN gate (convs)
 
 
 model_configs = {
@@ -77,6 +83,10 @@ def launch_training(args):
 
     # Set up model
     model = get_model(config)
+    if args.device=='cuda':
+        model.compile(mode='default')
+        print('Compiled model with torch.compile')
+
     rf = model.receptive_field_size
 
     # Check that provided input length is enough for model

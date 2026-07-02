@@ -47,7 +47,7 @@ class Wavenet(nn.Module):
         n_samples: Used during eval mode. Indicates how many samples per input should be drawn
 
         return: Train mode: output logits, shape (batch, 256, len_x-rf+1)
-                Eval mode: predicted next len_y time steps, shape (batch*n_samples, len_y)
+                Eval mode: predicted next len_y time steps, shape (batch, n_samples, len_y)
         """
 
         # Quantize & dequantize x
@@ -89,7 +89,7 @@ class Wavenet(nn.Module):
                 x = torch.cat([x, x_pred.unsqueeze(1)], dim=2)
             
             # Inverse mu law and normalization
-            y = x[:, :, -len_y:].view(-1, len_y)
+            y = x[:, :, -len_y:].view(-1, n_samples, len_y)
             y = inverse_mu_law(y)
             y *= 100  # back to [-100, 100]
 

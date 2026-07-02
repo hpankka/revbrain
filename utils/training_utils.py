@@ -1,10 +1,9 @@
 import os
-import warnings
-import json
+
 import importlib
 import matplotlib.pyplot as plt
 import numpy as np
-import torch
+
 
 # ----------General----------
 
@@ -20,34 +19,6 @@ def get_train_steps(is_rvq):
         raise ImportError(f"Could not find train step file. Ensure training/{train_steps_file}.py exists.") from e
     except AttributeError as e:
         raise AttributeError(f"Module '{train_steps_file}' does not define 'train_step' and 'val_step'.") from e
-    
-
-# ----------Argument validation----------
-
-def validate_training_args(args, is_rvq):
-    check_data_type(args.train_data_source, is_rvq)
-    check_data_type(args.val_data_source, is_rvq)
-    if os.path.exists(args.run_dir):
-        raise ValueError(f"Output directory '{args.run_dir}' already exists. Delete it or choose a different run_dir.")
-    if args.n_train_samples < args.batch_size:
-        raise ValueError(f'n_train_samples ({args.n_train_samples}) must be >= batch_size ({args.batch_size})')
-    if args.n_val_samples < args.batch_size:
-        raise ValueError(f'n_val_samples ({args.n_val_samples}) must be >= batch_size ({args.batch_size})')
-    if args.device=='cuda' and not torch.cuda.is_available():
-        args.device='cpu'
-        warnings.warn('CUDA not available, falling back to CPU', UserWarning)
-    if args.device=='cpu':
-        warnings.warn('CPU not recommended for training', UserWarning)
-
-def check_data_type(path, is_rvq):
-    meta_path = path.replace('.pt', '_meta_data.json')
-    with open(meta_path, 'r') as f:
-        meta = json.load(f)
-    is_tokenized = 'data_file' in meta
-    if is_rvq and not is_tokenized:
-        raise ValueError(f"RVQ models require tokenized data, but '{path}' is signal data.")
-    if not is_rvq and is_tokenized:
-        raise ValueError(f"WaveNet requires signal data, but '{path}' is RVQ tokenized data.")
 
 
 # ----------Saving and plotting losses----------

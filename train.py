@@ -5,9 +5,9 @@ import json
 
 import torch
 
+from utils.arg_checks import validate_training_args
 from utils.model_utils import get_model, RVQ_MODELS
 from utils.data_utils import get_dataloaders_for_training
-from utils.training_utils import validate_training_args
 from training.train_loop import train_loop
 
 torch.set_float32_matmul_precision('high')      # enables TF32 for matmuls

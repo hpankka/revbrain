@@ -6,7 +6,7 @@ import json
 import torch
 
 from utils.arg_checks import validate_training_args
-from utils.model_utils import get_model, RVQ_MODELS
+from utils.model_utils import get_model, RVQ_MODELS, MODEL_CONFIGS
 from utils.data_utils import get_dataloaders_for_training
 from training.train_loop import train_loop
 
@@ -14,31 +14,6 @@ torch.set_float32_matmul_precision('high')      # enables TF32 for matmuls
 torch.backends.cuda.matmul.allow_tf32 = True    # cuBLAS/cuBLASLt gate
 torch.backends.cudnn.allow_tf32 = True          # cuDNN gate (convs)
 
-
-model_configs = {
-    'revbrain': {
-        'embedding_dim': 8,
-        'enc_channels': 32,
-        'enc_kernel': 2,
-        'enc_blocks': 10,
-        'z_dim': 256,
-        'mlp_hidden_dim': 512,
-    },
-    'tf_revbrain': {
-        'enc_channels': 32,
-        'enc_kernel': 2,
-        'enc_blocks': 10,
-        'd_model': 256,
-        'n_head': 4,
-        'n_transformer_layers': 4,
-        'd_transformer_ff': 1024,
-    },
-    'wavenet': {
-        'n_channels': 32,
-        'kernel_size': 2,
-        'n_blocks': 10,
-    },
-}
 
 TRAIN_ARGS = {'train_data_source', 'run_dir', 'batch_size', 'val_batch_size', 'epochs', 'lr'}
 
@@ -52,7 +27,7 @@ def setup_training_config(args):
     config['train_config'] = train_config
 
     # Set up model config
-    model_config = dict(model_configs.get(args.model, {}))
+    model_config = dict(MODEL_CONFIGS.get(args.model, {}))
 
     if args.model in RVQ_MODELS:  # add M and N to RVQ models
         meta_path = args.train_data_source.replace('.pt', '_meta_data.json')

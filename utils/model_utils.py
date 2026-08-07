@@ -8,6 +8,31 @@ import torch
 
 RVQ_MODELS = {'revbrain', 'tf_revbrain'}
 
+MODEL_CONFIGS = {
+    'revbrain': {
+        'embedding_dim': 8,
+        'enc_channels': 32,
+        'enc_kernel': 2,
+        'enc_blocks': 10,
+        'z_dim': 256,
+        'mlp_hidden_dim': 512,
+    },
+    'tf_revbrain': {
+        'enc_channels': 32,
+        'enc_kernel': 2,
+        'enc_blocks': 10,
+        'd_model': 256,
+        'n_head': 4,
+        'n_transformer_layers': 4,
+        'd_transformer_ff': 1024,
+    },
+    'wavenet': {
+        'n_channels': 32,
+        'kernel_size': 2,
+        'n_blocks': 10,
+    },
+}
+
 def get_model(config):
     """
     Dynamically imports the model module and instantiates the class.

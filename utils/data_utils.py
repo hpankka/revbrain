@@ -196,9 +196,11 @@ class RandomSampler(Sampler):
     def __len__(self):
         return self.subset_size
     
-def define_loader(dataset, batch_size, n_samples, drop_last=True):
+def define_loader(dataset, batch_size, n_samples, drop_last=True, num_workers=4, pin_memory=True):
     return DataLoader(dataset, batch_size=batch_size, drop_last=drop_last,
-                      sampler=RandomSampler(dataset, n_samples))
+                      sampler=RandomSampler(dataset, n_samples),
+                      num_workers=num_workers, pin_memory=pin_memory,
+                      persistent_workers=num_workers > 0)
     
 def get_data_loader(file_path, len_x, len_y, batch_size, n_samples, drop_last=True):
     """

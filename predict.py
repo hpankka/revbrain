@@ -7,16 +7,7 @@ import torch
 
 from utils.arg_checks import check_cuda, validate_predict_args
 from utils.model_utils import load_run, run_rvq_inference, RVQ_MODELS
-from utils.data_utils import get_codebooks_tensor, get_data_loader
-
-
-def _get_codebook_dir_from_config(config):
-    """Read codebook_dir from the tokenized training data's metadata."""
-    train_data_path = config['train_config']['train_data_source']
-    meta_path = train_data_path.replace('.pt', '_meta_data.json')
-    with open(meta_path) as f:
-        meta = json.load(f)
-    return meta['codebook_dir']
+from utils.data_utils import get_codebook_dir_from_config, get_codebooks_tensor, get_data_loader
 
 
 def predict(args):
@@ -33,7 +24,7 @@ def predict(args):
     # Load codebooks
     codebooks, cb_meta = None, None
     if is_rvq:
-        codebook_dir = _get_codebook_dir_from_config(config)
+        codebook_dir = get_codebook_dir_from_config(config)
         codebooks, cb_meta = get_codebooks_tensor(codebook_dir)
         codebooks = codebooks.to(device)
         len_y = cb_meta['len_y']

@@ -72,6 +72,14 @@ def mu_law_quantize(x):
 
 # ----------RVQ----------
 
+def get_codebook_dir_from_config(config):
+    """Read codebook_dir from the tokenized training data's metadata."""
+    train_data_path = config['train_config']['train_data_source']
+    meta_path = train_data_path.replace('.pt', '_meta_data.json')
+    with open(meta_path) as f:
+        meta = json.load(f)
+    return meta['codebook_dir']
+
 def load_codebooks(cb_dir):
     cb_data = joblib.load(os.path.join(cb_dir, 'codebooks.joblib'))
 

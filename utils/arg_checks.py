@@ -58,3 +58,30 @@ def validate_predict_args(args):
 
     output_dir = args.output_dir or os.path.join(args.run_dir, 'predictions')
     check_dir(output_dir)
+
+def validate_test_latency_args(args, is_untrained_rvq):
+    if 'cuda' in args.device and not torch.cuda.is_available():
+        if 'pipeline_latency' in args.test_type:
+            raise ValueError(
+                "pipeline_latency test requires a GPU but CUDA is not available"
+            )
+        args.device = 'cpu'
+        warnings.warn('CUDA not available, falling back to CPU', UserWarning)
+
+    if args.len_y < 1:
+        raise ValueError(f'len_y must be >= 1, got {args.len_y}')
+    if any(n < 1 for n in args.n_samples):
+        raise ValueError(f'n_samples must be >= 1, got {args.n_samples}')
+
+    if args.mode == 'trained':
+        if not os.path.isdir(args.run_dir):
+            raise ValueError(f"run_dir '{args.run_dir}' does not exist.")
+        if not os.path.exists(os.path.join(args.run_dir, 'training_config.json')):
+            raise ValueError(f"Expected 'training_config.json' not found in run_dir '{args.run_dir}'.")
+    elif is_untrained_rvq:
+        if args.M is None or args.N is None:
+            raise ValueError(f"--M and --N are required to build an untrained '{args.model}' model")
+        if args.M < 1 or args.N < 1:
+            raise ValueError(f'--M and --N must be >= 1, got M={args.M}, N={args.N}')
+    elif args.M is not None or args.N is not None:
+        warnings.warn(f"--M/--N are ignored for '{args.model}' (not an RVQ model)", UserWarning)

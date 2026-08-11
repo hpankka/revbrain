@@ -1,4 +1,5 @@
 import os
+import argparse
 import json
 import joblib
 
@@ -247,3 +248,13 @@ def get_dataloaders_for_training(args, len_target, is_rvq_model):
     val_loader = _loader(args.val_data_source, args.n_val_samples, args.val_batch_size)
 
     return train_loader, val_loader
+
+
+# ----------Helpers----------
+
+def str2bool(s):
+    if s.lower() in ('true', '1', 'yes'):
+        return True
+    if s.lower() in ('false', '0', 'no'):
+        return False
+    raise argparse.ArgumentTypeError(f"Boolean value expected, got '{s}'")

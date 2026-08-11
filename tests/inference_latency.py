@@ -1,32 +1,16 @@
 import argparse
-import logging
 import os
 import sys
 import time
-import warnings
-
 import numpy as np
 import torch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.model_utils import load_training_config, get_model, run_rvq_inference, RVQ_MODELS
+from utils.model_utils import load_training_config, get_model, run_rvq_inference, silence_inductor_autotune_logging, RVQ_MODELS
+from utils.data_utils import str2bool
 
 torch.set_float32_matmul_precision('high')
 
-def silence_inductor_autotune_logging():
-    """
-    torch.compile(mode='max-autotune') logs a per-choice AUTOTUNE timing table and
-    an 'Autotune Choices Stats' JSON blob for every compiled op, which drowns out
-    the latency summary. Quiet both, and raise the inductor logger's level so its
-    warnings (e.g. 'Not enough SMs to use max_autotune_gemm mode') stay out too.
-    """
-    import torch._inductor.config as inductor_config
-    import torch._inductor.select_algorithm as select_algorithm
-
-    select_algorithm.PRINT_AUTOTUNE = False
-    inductor_config.max_autotune_report_choices_stats = False
-    logging.getLogger('torch._inductor').setLevel(logging.ERROR)
-    warnings.filterwarnings('ignore', message='TypedStorage is deprecated')
 
 def _timed_call(fn, device):
     """Run fn() under no_grad and return the elapsed time in milliseconds."""
@@ -91,13 +75,6 @@ def measure_latencies(args):
             times.append(pred_time)
 
     print_latency_summary(times, args)
-
-def str2bool(s):
-    if s.lower() in ('true', '1', 'yes'):
-        return True
-    if s.lower() in ('false', '0', 'no'):
-        return False
-    raise argparse.ArgumentTypeError(f"Boolean value expected, got '{s}'")
 
 
 if __name__ == "__main__":

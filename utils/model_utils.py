@@ -2,6 +2,8 @@ import os
 import json
 import importlib
 import torch
+import logging
+import warnings
 
 
 # ----------General----------
@@ -105,6 +107,7 @@ def get_receptive_field_size(kernel_size, num_layers):
     dilated_receptive_field = 1 + (kernel_size - 1) * dilation_sum
     return (kernel_size - 1) + dilated_receptive_field
 
+
 # ----------Transformer related----------
 
 def causal_attn_mask(sz, device=torch.device('cpu')):
@@ -112,3 +115,21 @@ def causal_attn_mask(sz, device=torch.device('cpu')):
     The masked positions are filled with float('-inf'). Unmasked positions are filled with float(0.0).
     """
     return torch.triu(torch.full((sz, sz), float("-inf"), device=device), diagonal=1)
+
+
+# ----------Compiling related----------
+
+def silence_inductor_autotune_logging():
+    """
+    torch.compile(mode='max-autotune') logs a per-choice AUTOTUNE timing table and
+    an 'Autotune Choices Stats' JSON blob for every compiled op, which drowns out
+    the latency summary. Quiet both, and raise the inductor logger's level so its
+    warnings (e.g. 'Not enough SMs to use max_autotune_gemm mode') stay out too.
+    """
+    import torch._inductor.config as inductor_config
+    import torch._inductor.select_algorithm as select_algorithm
+
+    select_algorithm.PRINT_AUTOTUNE = False
+    inductor_config.max_autotune_report_choices_stats = False
+    logging.getLogger('torch._inductor').setLevel(logging.ERROR)
+    warnings.filterwarnings('ignore', message='TypedStorage is deprecated')

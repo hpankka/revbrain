@@ -7,7 +7,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, Sampler, DataLoader
 from scipy import signal
-
+from scipy.signal import hilbert
 
 
 # ----------BP filtering----------
@@ -250,6 +250,57 @@ def get_dataloaders_for_training(args, len_target, is_rvq_model):
     return train_loader, val_loader
 
 
+# ----------Phase detection preprocessing----------
+
+def get_phase_signal(time_window):
+    hilbert_signal = hilbert(time_window)
+    phase_signal = np.angle(hilbert_signal, deg=True)
+
+    return phase_signal
+
+def get_category_masks(phase_array):
+    c1 = np.logical_and(phase_array <= 45, phase_array > -45)  # high
+    c2 = np.logical_or(phase_array > 135, phase_array <= -135)  # low
+    c3 = np.logical_and(phase_array > -135, phase_array <= -45)  # rising
+    c4 = np.logical_and(phase_array <= 135, phase_array > 45)  # falling
+
+    return [c1, c2, c3, c4]
+
+def assign_categories(phase_array):
+    masks = get_category_masks(phase_array)
+
+    # Assign category label 0-3 to the found category
+    for i in range(4):
+        phase_array[masks[i]] = i
+
+    return phase_array
+
+def assign_probabilities(phase_array):
+    masks = get_category_masks(phase_array)
+
+    # Calc the prob for each category (=the amount of samples in the category)
+    pcts = [np.mean(mask, axis=1, keepdims=True) for mask in masks] 
+
+    return np.concatenate(pcts, axis=1)  # (n, 4, len)
+
+def preprocess_phase_detection(inputs, gts, preds):
+    len_pred = gts.shape[1]
+
+    # Concat inputs to get accurate phase signals from the start
+    gts = np.concatenate([inputs[:, -50:], gts], axis=1)
+    preds = np.concatenate([np.repeat(inputs[:, np.newaxis, -50:], 100, axis=1), preds], axis=2)
+    
+    # Get phase signal at target ts
+    gt_phases = get_phase_signal(gts)[:, -len_pred:-15]
+    pred_phases = get_phase_signal(preds)[:, :, -len_pred:-15]    
+
+    # Define targets and inputs
+    y = assign_categories(gt_phases).astype(np.int64)   
+    x = assign_probabilities(pred_phases)
+
+    return x, y
+
+
 # ----------Helpers----------
 
 def str2bool(s):
@@ -258,3 +309,11 @@ def str2bool(s):
     if s.lower() in ('false', '0', 'no'):
         return False
     raise argparse.ArgumentTypeError(f"Boolean value expected, got '{s}'")
+
+def print_precision_table(precision, recall, thresholds):
+    for i in range(len(thresholds)//12):
+        print('-------------------------------------------------------------------------')
+        print(f'{"threshold %":>45}')
+        print(f'{" ":12}', *(f'{t:4}' for t in thresholds[i*12:i*12+12].astype(np.int64)))
+        print(f'{"precision":12}', *(f'{p:4.1f}' for p in precision[i*12:i*12+12]))
+        print(f'{"recall":12}', *(f'{r:4.1f}' for r in recall[i*12:i*12+12]))

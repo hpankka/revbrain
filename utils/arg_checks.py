@@ -59,6 +59,39 @@ def validate_predict_args(args):
     output_dir = args.output_dir or os.path.join(args.run_dir, 'predictions')
     check_dir(output_dir)
 
+def validate_test_metrics_args(args, meta):
+    if not os.path.isdir(args.prediction_dir):
+        raise ValueError(f"prediction_dir '{args.prediction_dir}' does not exist.")
+
+    if 'mae' in args.test_type:
+        for fname in ('predictions.npy', 'ground_truths.npy'):
+            if not os.path.exists(os.path.join(args.prediction_dir, fname)):
+                raise ValueError(f"Expected '{fname}' not found in prediction_dir '{args.prediction_dir}'.")
+        if meta['len_y'] <= 64:
+            warnings.warn(
+                f"len_y={meta['len_y']} <= 64: prediction doesn't contain any true forecast, "
+                "so mae_true/std_true cannot be calculated.", UserWarning
+            )
+
+    if 'phase_detection' in args.test_type:
+        if meta['n_samples'] != 100:
+            raise ValueError(
+                f"phase_detection requires predictions with exactly 100 samples, "
+                f"but predict_meta_data.json reports n_samples={meta['n_samples']}."
+            )
+
+        has_cache = os.path.exists(os.path.join(args.prediction_dir, 'phase_detection_x.npy'))
+        if not has_cache:
+            for fname in ('inputs.npy', 'ground_truths.npy', 'predictions.npy'):
+                if not os.path.exists(os.path.join(args.prediction_dir, fname)):
+                    raise ValueError(f"Expected '{fname}' not found in prediction_dir '{args.prediction_dir}'.")
+
+        max_ts = meta['len_y'] - 15
+        if not (0 <= args.detection_ts < max_ts):
+            raise ValueError(
+                f"detection_ts must be in [0, {max_ts}) given len_y={meta['len_y']}, got {args.detection_ts}."
+            )
+
 def validate_test_latency_args(args, is_untrained_rvq):
     if 'cuda' in args.device and not torch.cuda.is_available():
         if 'pipeline_latency' in args.test_type:

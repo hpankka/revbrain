@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot_mae(mae):
+def plot_mae(mae, group_delay, ms_per_sample):
 
     c = '#D4575E'
 
@@ -15,8 +15,8 @@ def plot_mae(mae):
     ax.plot(time_axis, mae, linewidth=2.5, color=c)
 
     ymax = max(mae)+1
-    ax.fill_between([0, 64], [0, 0], [ymax, ymax], color='#FAEBD7', alpha=0.5, zorder=2.5)
-    ax.vlines(x=64, ymin=0, ymax=ymax, color='grey', zorder=3)
+    ax.fill_between([0, group_delay], [0, 0], [ymax, ymax], color='#FAEBD7', alpha=0.5, zorder=2.5)
+    ax.vlines(x=group_delay, ymin=0, ymax=ymax, color='grey', zorder=3)
 
     ax.spines["bottom"].set_position(("data", 0))
     ax.spines["left"].set_position(("data", 0))
@@ -26,7 +26,7 @@ def plot_mae(mae):
     ax.set_xlim([0, len(mae)+3])
     ax.set_xlabel('Time (ms)')
     x_ticks = list(np.arange(0, len(mae), 10))
-    x_labels = [t*2 - 128 for t in x_ticks]
+    x_labels = [round(t*ms_per_sample - group_delay*ms_per_sample) for t in x_ticks]
     x_labels[::2] = [""]*(len(x_labels[::2]))
     ax.set_xticks(x_ticks, x_labels)
     ax.set_ylim([0, ymax])

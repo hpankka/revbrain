@@ -3,6 +3,8 @@ import json
 import warnings
 import torch
 
+from utils.data_utils import get_group_delay
+
 
 # ----------Argument validation----------
 
@@ -63,14 +65,16 @@ def validate_test_metrics_args(args, meta):
     if not os.path.isdir(args.prediction_dir):
         raise ValueError(f"prediction_dir '{args.prediction_dir}' does not exist.")
 
+    group_delay = get_group_delay(meta['bp_filter_len'])
+
     if 'mae' in args.test_type:
         for fname in ('predictions.npy', 'ground_truths.npy'):
             if not os.path.exists(os.path.join(args.prediction_dir, fname)):
                 raise ValueError(f"Expected '{fname}' not found in prediction_dir '{args.prediction_dir}'.")
-        if meta['len_y'] <= 64:
+        if meta['len_y'] <= group_delay:
             warnings.warn(
-                f"len_y={meta['len_y']} <= 64: prediction doesn't contain any true forecast, "
-                "so mae_true/std_true cannot be calculated.", UserWarning
+                f"len_y={meta['len_y']} <= group_delay={group_delay}: prediction doesn't contain any true "
+                "forecast, so mae_true/std_true cannot be calculated.", UserWarning
             )
 
     if 'phase_detection' in args.test_type:

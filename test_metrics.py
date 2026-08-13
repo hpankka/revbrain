@@ -6,7 +6,7 @@ import json
 import matplotlib.pyplot as plt
 
 from tests.metric_calculations import mae, phase_detection
-from utils.data_utils import preprocess_phase_detection, print_precision_table
+from utils.data_utils import preprocess_phase_detection, print_precision_table, get_group_delay
 from utils.plotting import plot_mae, plot_recall_precision
 from utils.arg_checks import validate_test_metrics_args
 
@@ -18,15 +18,17 @@ def run_mae():
     preds = _load_pred_res('predictions')
     gts = _load_pred_res('ground_truths')
 
-    errors = mae(preds, gts)
+    group_delay = get_group_delay(meta['bp_filter_len'])
+    errors = mae(preds, gts, group_delay)
 
-    print('\nMean absolute errors (\u03BCV)')    
+    print('\nMean absolute errors (\u03BCV)')
     print(f'{'Whole forecast':20} MAE={errors['mae_all']:.2f}  std={errors['std_all']:.2f}')
     print(f'{'True forecast':20} MAE={errors['mae_true']:.2f}  std={errors['std_true']:.2f}')
     print('MAE as a function of time ', np.round(errors['mae_func_of_time'], 2))
 
     if args.plot:
-        fig = plot_mae(errors['mae_func_of_time'])
+        ms_per_sample = 1000 / meta['fs']
+        fig = plot_mae(errors['mae_func_of_time'], group_delay, ms_per_sample)
         fig.savefig(os.path.join(args.prediction_dir, 'mae.png'), dpi=600)
         plt.close(fig)
 

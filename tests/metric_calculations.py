@@ -2,7 +2,7 @@ import numpy as np
 
 
 # ----------MAE----------
-def mae(preds, gts):
+def mae(preds, gts, group_delay):
 
     preds = np.mean(preds, axis=1)
 
@@ -15,8 +15,8 @@ def mae(preds, gts):
     errors['mae_all'] = np.mean(errors_all)
     errors['std_all'] = np.std(errors_all)
 
-    errors['mae_true'] = np.mean(errors_all[:, 64:])
-    errors['std_true'] = np.std(errors_all[:, 64:])
+    errors['mae_true'] = np.mean(errors_all[:, group_delay:])
+    errors['std_true'] = np.std(errors_all[:, group_delay:])
 
     errors['mae_func_of_time'] = np.mean(errors_all, axis=0)
 

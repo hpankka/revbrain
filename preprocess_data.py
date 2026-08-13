@@ -23,7 +23,6 @@ def read_matlab_data(file):
 
     return eeg, events, channels
 
-
 def extract_events(eeg, eyes, events_struct):
     event_types = {"open": ["2", "4", "6"], "closed": ["1", "3", "5"]}[eyes]
 
@@ -49,8 +48,7 @@ def extract_events(eeg, eyes, events_struct):
 
     return eeg_events
 
-
-def get_data_list(path_, channels, args):
+def get_data_list(path_, channels, args, fs):
     """
     Params:
     path_: path to the .mat file
@@ -63,7 +61,8 @@ def get_data_list(path_, channels, args):
     eeg, events, all_channels = read_matlab_data(path_)
 
     # Filter and trim
-    eeg = band_pass_filter(eeg, args.low_freq, args.high_freq, fs=500)
+    eeg = band_pass_filter(eeg, args.low_freq, args.high_freq,
+                           fs=fs, len_filter=args.bp_filter_len)
     eeg = eeg[:, 1000:-300]  # some files contain noise at start and end
 
     # Extract eye events
@@ -78,8 +77,9 @@ def get_data_list(path_, channels, args):
 
     return eeg_list
 
-
 def preprocess(args):
+
+    fs = 500
 
     # Define channels and subjects to process
     channels = args.channels if args.channels else ALL_CHANNELS
@@ -91,7 +91,7 @@ def preprocess(args):
     data_list = []
     for sub_id in sub_ids:
         path_ = os.path.join(args.data_path, f"{sub_id}_Depression_REST.mat")
-        sub_list = get_data_list(path_, channels, args)
+        sub_list = get_data_list(path_, channels, args, fs)
         data_list.extend(sub_list)
 
     # Record boundaries and build concatenated tensor 
@@ -108,8 +108,9 @@ def preprocess(args):
         'n_series': len(data_list),
         'low_freq': args.low_freq,
         'high_freq': args.high_freq,
+        'bp_filter_len': args.bp_filter_len,
+        'fs': fs,
         'eyes': args.eyes,
-        'fs': 500,
         'channels': channels,
         'sub_ids': sub_ids,
         'boundaries': boundaries,
@@ -132,8 +133,9 @@ if __name__ == "__main__":
     parser.add_argument('--sub_split', type=str, choices=['train', 'val', 'test'],
                         help='Use default subject IDs for this split. Provide either this or custom IDs with sub_ids argument.')
     # Optional preprocessing arguments
-    parser.add_argument('--low_freq', type=float, default=8.0, help='Lower bandpass frequency (Hz)')
-    parser.add_argument('--high_freq', type=float, default=13.0, help='Upper bandpass frequency (Hz)')
+    parser.add_argument('--low_freq', type=float, default=8.0, help='Lower bandpass frequency (Hz) (default: 8.0)')
+    parser.add_argument('--high_freq', type=float, default=13.0, help='Upper bandpass frequency (Hz) (default: 13.0)')
+    parser.add_argument('--bp_filter_len', type=int, default=128, help='Length of the band-pass filter (default: 128)')
     parser.add_argument('--eyes', type=str, default='open', choices=['open', 'closed'],
                         help='Eyes condition to extract')
     parser.add_argument('--channels', type=str, nargs='*', default=None,

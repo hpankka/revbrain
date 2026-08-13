@@ -40,6 +40,10 @@ def predict(args):
                                   args.n_test_windows,
                                   drop_last=False)
     
+    test_data_meta_path = args.test_data_source.replace('.pt', '_meta_data.json')
+    with open(test_data_meta_path) as f:
+        test_data_meta = json.load(f)
+
     # Create output dir and save metadata
     output_dir = args.output_dir or os.path.join(args.run_dir, 'predictions')
     print(f'Creating output directory {output_dir}...')
@@ -52,7 +56,9 @@ def predict(args):
         'n_samples':        args.n_samples,
         'len_x':            len_x,
         'len_y':            len_y,
-        'sampling':         args.sampling
+        'sampling':         args.sampling,
+        'fs':               test_data_meta['fs'],
+        'bp_filter_len':    test_data_meta['bp_filter_len'],
     }
     with open(os.path.join(output_dir, 'predict_meta_data.json'), 'w') as f:
         json.dump(meta, f, indent=2)

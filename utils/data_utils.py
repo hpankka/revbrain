@@ -12,6 +12,9 @@ from scipy.signal import hilbert
 
 # ----------BP filtering----------
 
+def get_group_delay(num_taps):
+    return num_taps // 2
+
 def get_linear_phase_filter(low_freq, high_freq, fs, num_taps=128):
     """
     Design a linear phase FIR bandpass filter
@@ -30,16 +33,16 @@ def get_linear_phase_filter(low_freq, high_freq, fs, num_taps=128):
 
     return filt
 
-def band_pass_filter(eeg, low_freq, high_freq, fs):
+def band_pass_filter(eeg, low_freq, high_freq, fs, len_filter):
     """Apply linear phase FIR filter
-    - The group delay is (len(filter)-1)//2
-    
+    - The group delay is get_group_delay(len_filter)
+
     Params:
     eeg: EEG signal to be filtered
     low_freq, high_freq: passband edges in Hz
     fs: sampling frequency in Hz"""
     print(f'Applying causal linear phase band-pass filtering: {low_freq}--{high_freq}Hz')
-    filt = get_linear_phase_filter(low_freq, high_freq, fs)
+    filt = get_linear_phase_filter(low_freq, high_freq, fs, len_filter)
     filtered = signal.lfilter(filt, 1, eeg)
 
     return filtered
@@ -287,8 +290,8 @@ def preprocess_phase_detection(inputs, gts, preds):
     len_pred = gts.shape[1]
 
     # Concat inputs to get accurate phase signals from the start
-    gts = np.concatenate([inputs[:, -50:], gts], axis=1)
-    preds = np.concatenate([np.repeat(inputs[:, np.newaxis, -50:], 100, axis=1), preds], axis=2)
+    gts = np.concatenate([inputs[:, -100:], gts], axis=1)
+    preds = np.concatenate([np.repeat(inputs[:, np.newaxis, -100:], 100, axis=1), preds], axis=2)
     
     # Get phase signal at target ts
     gt_phases = get_phase_signal(gts)[:, -len_pred:-15]

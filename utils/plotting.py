@@ -2,6 +2,37 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def plot_predictions(samples, inputs, gts):
+
+    font_s = 16
+    plt.rcParams.update({'font.size': font_s})
+
+    fig, axes = plt.subplots(1, 3, figsize=(16.5, 3.8), sharey=True)
+
+    for ax, samples_, input, gt in zip(axes, samples, inputs, gts):
+        input = input[-250:]
+
+        gt = np.concatenate([input, gt])
+        len_ = gt.shape[0]*2
+        len_pred = samples_.shape[1]*2
+        time_axis = np.arange(0, len_, 2)
+        predicted_time = np.arange(len_-len_pred, len_, 2)
+
+        ax.plot(time_axis, gt, c='black', linewidth=2.5)
+        ax.plot(predicted_time, samples_.T, alpha=0.2, c='purple', linewidth=2.5)
+
+        ax.set_xlabel('Time (ms)')
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.tick_params(width=1.5)
+
+    axes[0].set_ylabel('Amplitude (\u03BCV)')
+    axes[0].legend(['Measured signal', 'Predicted samples'], frameon=False)
+
+    fig.tight_layout()
+
+    return fig
+
 def plot_mae(mae, group_delay, ms_per_sample):
 
     c = '#D4575E'

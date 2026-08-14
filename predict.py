@@ -4,10 +4,12 @@ import json
 
 import numpy as np
 import torch
+import matplotlib.pyplot as plt
 
 from utils.arg_checks import check_cuda, validate_predict_args
 from utils.model_utils import load_run, run_rvq_inference, RVQ_MODELS
 from utils.data_utils import get_codebook_dir_from_config, get_codebooks_tensor, get_data_loader
+from utils.plotting import plot_predictions
 
 
 def predict(args):
@@ -110,6 +112,16 @@ def predict(args):
 
     print(f'Saved predictions to {output_dir}')
 
+    if args.plot:
+        n_plot = 15
+        n_per_fig = 3
+        plot_indices = np.random.choice(args.n_test_windows, n_plot, replace=False)
+        for fig_i, s in enumerate(range(0, n_plot, n_per_fig)):
+            idxs = plot_indices[s:s+n_per_fig]
+            fig = plot_predictions(all_preds[idxs], all_inputs[idxs], all_gts[idxs])
+            fig.savefig(os.path.join(output_dir, f'predictions_{fig_i}.png'), dpi=600)
+            plt.close(fig)
+
 
 if __name__ == "__main__":
 
@@ -124,7 +136,7 @@ if __name__ == "__main__":
     # General options
     parser.add_argument('--n_samples', type=int, default=10,
                         help='Prediction samples to draw per input (default: 10)')
-    parser.add_argument('--n_test_windows', type=int, default=1000,
+    parser.add_argument('--n_test_windows', type=int, default=10000,
                         help='Number of test windows to predict (default: 10000)')
     parser.add_argument('--batch_size', type=int, default=100)
     parser.add_argument('--device', type=str, default='cuda')
@@ -133,6 +145,8 @@ if __name__ == "__main__":
     parser.set_defaults(sampling=True)
     parser.add_argument('--output_dir', type=str, default=None,
                         help='Where to save results (default: <run_dir>/predictions/)')
+    parser.add_argument('--plot', action=argparse.BooleanOptionalAction, default=True,
+                        help='Whether to plot example predictions. Plots are saved to output_dir.')
 
     # WaveNet options
     parser.add_argument('--len_y', type=int, default=100,

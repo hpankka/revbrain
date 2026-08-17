@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 
 
 def plot_predictions(samples, inputs, gts):
+    n_samples = samples.shape[1]
+    alpha = np.interp(n_samples, [10, 100], [0.2, 0.05])
 
     font_s = 16
     plt.rcParams.update({'font.size': font_s})
@@ -19,7 +21,7 @@ def plot_predictions(samples, inputs, gts):
         predicted_time = np.arange(len_-len_pred, len_, 2)
 
         ax.plot(time_axis, gt, c='black', linewidth=2.5)
-        ax.plot(predicted_time, samples_.T, alpha=0.2, c='purple', linewidth=2.5)
+        ax.plot(predicted_time, samples_.T, alpha=alpha, c='purple', linewidth=2.5)
 
         ax.set_xlabel('Time (ms)')
         ax.spines["top"].set_visible(False)

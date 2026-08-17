@@ -45,7 +45,7 @@ def plot_mae(mae, group_delay, ms_per_sample):
     time_axis = np.arange(1, len(mae)+1)
     ax.plot(time_axis, mae, linewidth=2.5, color=c)
 
-    ymax = max(mae)+1
+    ymax = max(mae)+0.25
     ax.fill_between([0, group_delay], [0, 0], [ymax, ymax], color='#FAEBD7', alpha=0.5, zorder=2.5)
     ax.vlines(x=group_delay, ymin=0, ymax=ymax, color='grey', zorder=3)
 

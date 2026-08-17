@@ -14,14 +14,11 @@ from utils.plotting import plot_predictions
 
 def predict(args):
 
-    check_cuda(args)
     device = torch.device(args.device)
 
     # Load model
     model, config = load_run(args.run_dir, args.device)
     is_rvq = config['model'] in RVQ_MODELS
-
-    validate_predict_args(args)
 
     # Load codebooks
     codebooks, cb_meta = None, None
@@ -47,9 +44,8 @@ def predict(args):
         test_data_meta = json.load(f)
 
     # Create output dir and save metadata
-    output_dir = args.output_dir or os.path.join(args.run_dir, 'predictions')
-    print(f'Creating output directory {output_dir}...')
-    os.makedirs(output_dir)
+    print(f'Creating output directory {args.output_dir}...')
+    os.makedirs(args.output_dir)
     meta = {
         'model':            config['model'],
         'run_dir':          args.run_dir,
@@ -62,13 +58,13 @@ def predict(args):
         'fs':               test_data_meta['fs'],
         'bp_filter_len':    test_data_meta['bp_filter_len'],
     }
-    with open(os.path.join(output_dir, 'predict_meta_data.json'), 'w') as f:
+    with open(os.path.join(args.output_dir, 'predict_meta_data.json'), 'w') as f:
         json.dump(meta, f, indent=2)
 
     # Define result files
     def _define_memmap(fname, shape_):
         return np.lib.format.open_memmap(
-            os.path.join(output_dir, fname+'.npy'),
+            os.path.join(args.output_dir, fname+'.npy'),
             mode='w+', dtype=np.float32, shape=shape_
             )
     all_inputs = _define_memmap('inputs', (args.n_test_windows, len_x))
@@ -110,7 +106,7 @@ def predict(args):
         all_gts.flush()
         all_preds.flush()
 
-    print(f'Saved predictions to {output_dir}')
+    print(f'Saved predictions to {args.output_dir}')
 
     if args.plot:
         n_plot = 15
@@ -119,7 +115,7 @@ def predict(args):
         for fig_i, s in enumerate(range(0, n_plot, n_per_fig)):
             idxs = plot_indices[s:s+n_per_fig]
             fig = plot_predictions(all_preds[idxs], all_inputs[idxs], all_gts[idxs])
-            fig.savefig(os.path.join(output_dir, f'predictions_{fig_i}.png'), dpi=600)
+            fig.savefig(os.path.join(args.output_dir, f'predictions_{fig_i}.png'), dpi=600)
             plt.close(fig)
 
 
@@ -153,5 +149,9 @@ if __name__ == "__main__":
                         help='Prediction horizon in timesteps (WaveNet only; read from codebook for RVQ models)')
 
     args = parser.parse_args()
+
+    args.output_dir = args.output_dir or os.path.join(args.run_dir, 'predictions')
+    check_cuda(args)
+    validate_predict_args(args)
 
     predict(args)

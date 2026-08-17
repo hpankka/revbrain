@@ -58,8 +58,7 @@ def validate_predict_args(args):
         raise ValueError(f"Prediction requires signal data, but '{args.test_data_source}' is tokenized. "
                          "Provide a preprocessed .pt file.")
 
-    output_dir = args.output_dir or os.path.join(args.run_dir, 'predictions')
-    check_dir(output_dir)
+    check_dir(args.output_dir)
 
 def validate_test_metrics_args(args, meta):
     if not os.path.isdir(args.prediction_dir):

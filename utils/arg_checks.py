@@ -8,7 +8,7 @@ from utils.data_utils import get_group_delay
 
 # ----------Argument validation----------
 
-def check_dir(dir_):
+def check_dir_not_created(dir_):
     if os.path.exists(dir_):
         raise ValueError(f"Output directory '{dir_}' already exists. Delete it or choose a different directory.")
 
@@ -34,7 +34,7 @@ def check_data_type(path, is_rvq):
         raise ValueError(f"WaveNet requires signal data, but '{path}' is RVQ tokenized data.")
 
 def validate_training_args(args, is_rvq):
-    check_dir(args.run_dir)
+    check_dir_not_created(args.run_dir)
     for type_, source_ in zip(('training', 'validation'), (args.train_data_source, args.val_data_source)):
         if not os.path.exists(source_):
             raise ValueError(f"Provided {type_} data '{source_}' does not exist.")
@@ -61,7 +61,7 @@ def validate_predict_args(args):
         raise ValueError(f"Prediction requires signal data, but '{args.test_data_source}' is tokenized. "
                          "Provide a preprocessed .pt file.")
 
-    check_dir(args.output_dir)
+    check_dir_not_created(args.output_dir)
 
 def validate_test_metrics_args(args, meta):
     if not os.path.isdir(args.prediction_dir):

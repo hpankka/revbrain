@@ -12,6 +12,15 @@ def check_dir_not_created(dir_):
     if os.path.exists(dir_):
         raise ValueError(f"Output directory '{dir_}' already exists. Delete it or choose a different directory.")
 
+def check_dir_exists(dir_, dir_type):
+    if not os.path.isdir(dir_):
+        raise ValueError(f"{dir_type} '{dir_}' does not exist.")
+
+def check_file_exists(file_path, file_type):
+    if not os.path.exists(file_path):
+        dir_, fn = os.path.split(file_path)
+        raise ValueError(f"{file_type} file '{fn}' not found in dir '{dir_}'.")
+
 def check_cuda(args, required=False):
     if 'cuda' in args.device and not torch.cuda.is_available():
         if required:
@@ -36,10 +45,8 @@ def check_data_type(path, is_rvq):
 def validate_training_args(args, is_rvq):
     check_dir_not_created(args.run_dir)
     for type_, source_ in zip(('training', 'validation'), (args.train_data_source, args.val_data_source)):
-        if not os.path.exists(source_):
-            raise ValueError(f"Provided {type_} data '{source_}' does not exist.")
-    check_data_type(args.train_data_source, is_rvq)
-    check_data_type(args.val_data_source, is_rvq)
+        check_file_exists(source_, 'Provided '+type_+' data')
+        check_data_type(source_, is_rvq)
     if args.n_train_samples < args.batch_size:
         raise ValueError(f'n_train_samples ({args.n_train_samples}) must be >= batch_size ({args.batch_size})')
     if args.n_val_samples < args.batch_size:
@@ -49,30 +56,24 @@ def validate_training_args(args, is_rvq):
         warnings.warn('CPU not recommended for training', UserWarning)
 
 def validate_predict_args(args):
-    if not os.path.isdir(args.run_dir):
-        raise ValueError(f"run_dir '{args.run_dir}' does not exist.")
+    check_dir_not_created(args.output_dir)
+    check_dir_exists(args.run_dir, 'run_dir')
     for fname in ('training_config.json', 'model.pth'):
-        if not os.path.exists(os.path.join(args.run_dir, fname)):
-            raise ValueError(f"Expected '{fname}' not found in run_dir '{args.run_dir}'.")
-    if not os.path.exists(args.test_data_source):
-        raise ValueError(f"test_data_source '{args.test_data_source}' does not exist.")
-    is_tokenized = check_is_tokenized(args.test_data_source)
-    if is_tokenized:
+        check_file_exists(os.path.join(args.run_dir, fname), 'Required')
+    check_file_exists(args.test_data_source, 'Provided test data')
+
+    if check_is_tokenized(args.test_data_source):
         raise ValueError(f"Prediction requires signal data, but '{args.test_data_source}' is tokenized. "
                          "Provide a preprocessed .pt file.")
 
-    check_dir_not_created(args.output_dir)
-
 def validate_test_metrics_args(args, meta):
-    if not os.path.isdir(args.prediction_dir):
-        raise ValueError(f"prediction_dir '{args.prediction_dir}' does not exist.")
+    check_dir_exists(args.prediction_dir, 'prediction_dir')
 
     group_delay = get_group_delay(meta['bp_filter_len'])
 
     if 'mae' in args.test_type:
         for fname in ('predictions.npy', 'ground_truths.npy'):
-            if not os.path.exists(os.path.join(args.prediction_dir, fname)):
-                raise ValueError(f"Expected '{fname}' not found in prediction_dir '{args.prediction_dir}'.")
+            check_file_exists(os.path.join(args.prediction_dir, fname), 'Required')
         if meta['len_y'] <= group_delay:
             warnings.warn(
                 f"len_y={meta['len_y']} <= group_delay={group_delay}: prediction doesn't contain any true "
@@ -89,8 +90,7 @@ def validate_test_metrics_args(args, meta):
         has_cache = os.path.exists(os.path.join(args.prediction_dir, 'phase_detection_x.npy'))
         if not has_cache:
             for fname in ('inputs.npy', 'ground_truths.npy', 'predictions.npy'):
-                if not os.path.exists(os.path.join(args.prediction_dir, fname)):
-                    raise ValueError(f"Expected '{fname}' not found in prediction_dir '{args.prediction_dir}'.")
+                check_file_exists(os.path.join(args.prediction_dir, fname), 'Required')
 
         max_ts = meta['len_y'] - 15
         if not (0 <= args.detection_ts < max_ts):
@@ -110,10 +110,9 @@ def validate_test_latency_args(args, is_untrained_rvq):
         raise ValueError(f'n_samples must be >= 1, got {args.n_samples}')
 
     if args.mode == 'trained':
-        if not os.path.isdir(args.run_dir):
-            raise ValueError(f"run_dir '{args.run_dir}' does not exist.")
-        if not os.path.exists(os.path.join(args.run_dir, 'training_config.json')):
-            raise ValueError(f"Expected 'training_config.json' not found in run_dir '{args.run_dir}'.")
+        check_dir_exists(args.run_dir, 'run_dir')
+        check_file_exists(os.path.join(args.run_dir, 'training_config.json'), 'Required')
+
     elif is_untrained_rvq:
         if args.M is None or args.N is None:
             raise ValueError(f"--M and --N are required to build an untrained '{args.model}' model")

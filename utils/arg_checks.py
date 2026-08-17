@@ -12,10 +12,13 @@ def check_dir(dir_):
     if os.path.exists(dir_):
         raise ValueError(f"Output directory '{dir_}' already exists. Delete it or choose a different directory.")
 
-def check_cuda(args):
+def check_cuda(args, required=False):
     if 'cuda' in args.device and not torch.cuda.is_available():
-        args.device='cpu'
-        warnings.warn('CUDA not available, falling back to CPU', UserWarning)
+        if required:
+            raise ValueError('script requires a GPU but CUDA is not available')
+        else:
+            args.device='cpu'
+            warnings.warn('CUDA not available, falling back to CPU', UserWarning)
 
 def check_is_tokenized(path):
     meta_path = path.replace('.pt', '_meta_data.json')
@@ -96,13 +99,10 @@ def validate_test_metrics_args(args, meta):
             )
 
 def validate_test_latency_args(args, is_untrained_rvq):
-    if 'cuda' in args.device and not torch.cuda.is_available():
-        if 'pipeline_latency' in args.test_type:
-            raise ValueError(
-                "pipeline_latency test requires a GPU but CUDA is not available"
-            )
-        args.device = 'cpu'
-        warnings.warn('CUDA not available, falling back to CPU', UserWarning)
+    if 'pipeline_latency' in args.test_type:
+        check_cuda(args, required=True)
+    else:
+        check_cuda(args, required=False)
 
     if args.len_y < 1:
         raise ValueError(f'len_y must be >= 1, got {args.len_y}')

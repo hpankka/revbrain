@@ -67,7 +67,6 @@ def validate_predict_args(args):
                          "Provide a preprocessed .pt file.")
 
 def validate_test_metrics_args(args, meta):
-    check_dir_exists(args.prediction_dir, 'prediction_dir')
 
     group_delay = get_group_delay(meta['bp_filter_len'])
 

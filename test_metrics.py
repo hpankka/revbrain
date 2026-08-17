@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from tests.metric_calculations import mae, phase_detection
 from utils.data_utils import preprocess_phase_detection, print_precision_table, get_group_delay
 from utils.plotting import plot_mae, plot_recall_precision
-from utils.arg_checks import validate_test_metrics_args
+from utils.arg_checks import check_dir_exists, check_file_exists, validate_test_metrics_args
 
 
 def _load_pred_res(type_):
@@ -70,9 +70,12 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    with open(os.path.join(args.prediction_dir, 'predict_meta_data.json')) as f:
-        meta = json.load(f)
+    check_dir_exists(args.prediction_dir, 'prediction_dir')
+    meta_path = os.path.join(args.prediction_dir, 'predict_meta_data.json')
+    check_file_exists(meta_path, 'Required')
 
+    with open(meta_path) as f:
+        meta = json.load(f)
     validate_test_metrics_args(args, meta)
 
     if 'mae' in args.test_type:

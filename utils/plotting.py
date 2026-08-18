@@ -93,7 +93,7 @@ def plot_recall_precision(precision, recall, ths):
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.tick_params(width=1.5)
-    ax.set_xlim([49, 100])
+    ax.set_xlim([ths[0]-1, 100])
     ax.set_xlabel('Threshold %')
     ax.set_ylim([0, 100])
     ax.set_ylabel('%', rotation=0, labelpad=12)

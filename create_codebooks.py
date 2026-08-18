@@ -14,7 +14,8 @@ def launch_codebook_training(args):
                                   len_x=1,
                                   len_y=args.len_y,
                                   batch_size=args.n_samples,
-                                  n_samples=args.n_samples)
+                                  n_samples=args.n_samples,
+                                  mmap=args.mmap)
     
     print(f"Creating {args.M} codebooks of size {args.N}...\n")
     create_codebooks(args, data_loader)
@@ -32,6 +33,7 @@ if __name__ == "__main__":
     parser.add_argument('--len_y', type=int, default=100, help='Length of the prediction horizon in time steps')
     parser.add_argument('--n_samples', type=int, default=50_000, help='Number of training samples')
     parser.add_argument('--in_relat_enc', action=argparse.BooleanOptionalAction, default=True, help='Whether to apply input relative encoding')
+    parser.add_argument('--mmap', action='store_true', help='Memory-map data from disk instead of loading it fully into RAM. Use this if the dataset does not fit in RAM')
     
     args = parser.parse_args()
     

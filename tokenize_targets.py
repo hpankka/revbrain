@@ -12,7 +12,7 @@ CHUNK_SIZE = 10_000
 
 
 def tokenize(args):
-    data, meta_data = load_preprocessed_data(args.data_file)
+    data, meta_data = load_preprocessed_data(args.data_file, mmap=args.mmap)
     cb_models, cb_meta = load_codebooks(args.codebook_dir)
 
     M            = cb_meta['M']
@@ -64,6 +64,7 @@ if __name__ == "__main__":
     parser.add_argument('data_file', type=str, help='Which data file to tokenize')
     parser.add_argument('codebook_dir', type=str, help='Which codebooks to use')
     parser.add_argument('output_name', type=str, help='Output file name (without extension), saved in the same folder as data_file')
+    parser.add_argument('--mmap', action='store_true', help='Memory-map data from disk instead of loading it fully into RAM. Use this if the dataset does not fit in RAM')
 
     args = parser.parse_args()
 

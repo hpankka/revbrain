@@ -32,12 +32,13 @@ def predict(args):
 
     # Set up dataloader
     len_x = model.receptive_field_size
-    data_loader = get_data_loader(args.test_data_source, 
+    data_loader = get_data_loader(args.test_data_source,
                                   len_x,
                                   len_y,
                                   args.batch_size,
                                   args.n_test_windows,
-                                  drop_last=False)
+                                  drop_last=False,
+                                  mmap=args.mmap)
     
     test_data_meta_path = args.test_data_source.replace('.pt', '_meta_data.json')
     with open(test_data_meta_path) as f:
@@ -136,6 +137,7 @@ if __name__ == "__main__":
                         help='Number of test windows to predict (default: 10000)')
     parser.add_argument('--batch_size', type=int, default=100)
     parser.add_argument('--device', type=str, default='cuda')
+    parser.add_argument('--mmap', action='store_true', help='Memory-map data from disk instead of loading it fully into RAM. Use this if the dataset does not fit in RAM')
     parser.add_argument('--no_sampling', dest='sampling', action='store_false',
                         help='Use argmax instead of sampling from the predicted distribution')
     parser.set_defaults(sampling=True)

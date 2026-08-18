@@ -286,20 +286,32 @@ def assign_probabilities(phase_array):
 
     return np.concatenate(pcts, axis=1)  # (n, 4, len)
 
-def preprocess_phase_detection(inputs, gts, preds):
-    len_pred = gts.shape[1]
+def preprocess_phase_detection(inputs, gts, preds, chunk_size=2000):
 
-    # Concat inputs to get accurate phase signals from the start
-    gts = np.concatenate([inputs[:, -100:], gts], axis=1)
-    preds = np.concatenate([np.repeat(inputs[:, np.newaxis, -100:], 100, axis=1), preds], axis=2)
-    
-    # Get phase signal at target ts
-    gt_phases = get_phase_signal(gts)[:, -len_pred:-15]
-    pred_phases = get_phase_signal(preds)[:, :, -len_pred:-15]    
+    n_windows, n_samples, len_pred = preds.shape
+    context = 100  # amount of preceding input needed for accurate phase at the window start
 
-    # Define targets and inputs
-    y = assign_categories(gt_phases).astype(np.int64)   
-    x = assign_probabilities(pred_phases)
+    x = np.empty((n_windows, 4, len_pred - 15), dtype=np.float64)
+    y = np.empty((n_windows, len_pred - 15), dtype=np.int64)
+
+    for s in range(0, n_windows, chunk_size):
+        e = min(s + chunk_size, n_windows)
+
+        # Concat inputs to get accurate phase signals from the start.
+        tail = inputs[s:e, -context:]
+        gts_chunk = np.concatenate([tail, gts[s:e]], axis=1)
+        preds_chunk = np.concatenate(
+            [np.broadcast_to(tail[:, np.newaxis, :], (e - s, n_samples, context)), preds[s:e]],
+            axis=2,
+        )
+
+        # Get phase signal at target ts
+        gt_phases = get_phase_signal(gts_chunk)[:, -len_pred:-15]
+        pred_phases = get_phase_signal(preds_chunk)[:, :, -len_pred:-15]
+
+        # Define targets and inputs
+        y[s:e] = assign_categories(gt_phases).astype(np.int64)
+        x[s:e] = assign_probabilities(pred_phases)
 
     return x, y
 

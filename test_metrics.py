@@ -11,8 +11,8 @@ from utils.plotting import plot_mae, plot_recall_precision
 from utils.arg_checks import check_dir_exists, check_file_exists, validate_test_metrics_args
 
 
-def _load_pred_res(type_):
-    return np.load(os.path.join(args.prediction_dir, f'{type_}.npy'))
+def _load_pred_res(type_, mmap_mode=None):
+    return np.load(os.path.join(args.prediction_dir, f'{type_}.npy'), mmap_mode=mmap_mode)
 
 def run_mae():
     preds = _load_pred_res('predictions')
@@ -38,10 +38,10 @@ def run_phase_detection():
         x = _load_pred_res('phase_detection_x')
         y = _load_pred_res('phase_detection_y')
     else:
-        inputs = _load_pred_res('inputs')
-        gts = _load_pred_res('ground_truths')
-        preds = _load_pred_res('predictions')
-        x, y = preprocess_phase_detection(inputs, gts, preds)
+        inputs = _load_pred_res('inputs', mmap_mode='r')
+        gts = _load_pred_res('ground_truths', mmap_mode='r')
+        preds = _load_pred_res('predictions', mmap_mode='r')
+        x, y = preprocess_phase_detection(inputs, gts, preds, chunk_size=args.preprocessing_chunk_size)
         np.save(os.path.join(args.prediction_dir, 'phase_detection_x.npy'), x)
         np.save(os.path.join(args.prediction_dir, 'phase_detection_y.npy'), y)
 
@@ -67,7 +67,8 @@ if __name__ == "__main__":
                         help='Whether to plot the results. Plots are saved to prediction_dir.')
     parser.add_argument('--detection_ts', type=int, default=66,
                         help='Time stamp to be used for phase detection (default: 66, corresponding to 6 ms in the future with sampling rate of 500 Hz and filter length of 128)')
-
+    parser.add_argument('--preprocessing_chunk_size', type=int, default=2000,
+                        help='Chunk size used for preprocessing the data for phase detection. Adjust to fit your memory resources (default: 2000).')
     args = parser.parse_args()
 
     check_dir_exists(args.prediction_dir, 'prediction_dir')

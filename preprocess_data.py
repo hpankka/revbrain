@@ -8,6 +8,7 @@ from scipy.io import loadmat
 
 from utils.data_utils import band_pass_filter
 from utils.eeg_metadata import ALL_CHANNELS, TRAIN_SUBJECTS, VAL_SUBJECTS, TEST_SUBJECTS
+from utils.arg_checks import validate_preprocessing_args
 
 
 def read_matlab_data(file):
@@ -143,9 +144,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if not args.sub_ids and not args.sub_split:
-        parser.error('Provide sub_ids or --sub_split')
-    if args.sub_ids and args.sub_split:
-        parser.error('Provide either sub_ids or --sub_split, not both')
+    validate_preprocessing_args(args)
 
     preprocess(args)

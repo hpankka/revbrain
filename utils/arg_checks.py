@@ -42,6 +42,21 @@ def check_data_type(path, is_rvq):
     if not is_rvq and is_tokenized:
         raise ValueError(f"WaveNet requires signal data, but '{path}' is RVQ tokenized data.")
 
+def validate_preprocessing_args(args):
+    check_dir_exists(args.data_path, 'EEG data path')
+
+    if not args.sub_ids and not args.sub_split:
+        raise ValueError('Provide sub_ids or --sub_split')
+    if args.sub_ids and args.sub_split:
+        raise ValueError('Provide either sub_ids or --sub_split, not both')
+
+    if args.low_freq >= args.high_freq:
+        raise ValueError('Lower band-pass frequency should be lower than higher band-pass frequency.'
+                         f'Got invalid frequency range [{args.low_freq}--{args.high_freq}]')
+
+    if args.bp_filter_len <= 0:
+        raise ValueError('Length of the band-pass filter should be >0')
+
 def validate_training_args(args, is_rvq):
     check_dir_not_created(args.run_dir)
     for type_, source_ in zip(('training', 'validation'), (args.train_data_source, args.val_data_source)):

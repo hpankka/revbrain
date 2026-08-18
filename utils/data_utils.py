@@ -107,8 +107,9 @@ def vector_quantize(cb_model, y):
 
 # ----------Datasets----------
 
-def load_preprocessed_data(file_path):
-    data = torch.load(file_path, mmap=True)
+def load_preprocessed_data(file_path, mmap=False):
+
+    data = torch.load(file_path, mmap=mmap)
 
     meta_path = file_path.replace('.pt', '_meta_data.json')
     with open(meta_path, 'r') as f:
@@ -117,14 +118,14 @@ def load_preprocessed_data(file_path):
     return data, meta
 
 class EEGData(Dataset):
-    def __init__(self, file_path, len_x, len_y):
+    def __init__(self, file_path, len_x, len_y, mmap=False):
         super().__init__()
 
         self.len_x = len_x
         self.len_y = len_y
         self.window = len_x + len_y
 
-        self.data, meta_data = load_preprocessed_data(file_path)
+        self.data, meta_data = load_preprocessed_data(file_path, mmap=mmap)
         self.boundaries = meta_data['boundaries']
 
         # Number of valid windows per segment
@@ -146,8 +147,8 @@ class EEGData(Dataset):
         return x, y
 
 class EEGDataOverlapY(EEGData):
-    def __init__(self, file_path, len_x, len_target):
-        super().__init__(file_path, len_x, len_y=1)
+    def __init__(self, file_path, len_x, len_target, mmap=False):
+        super().__init__(file_path, len_x, len_y=1, mmap=mmap)
         self.len_target = len_target
 
     def __getitem__(self, idx):
@@ -159,14 +160,14 @@ class EEGDataOverlapY(EEGData):
         return x, y
 
 class EEGDataTokenizedY(Dataset):
-    def __init__(self, file_path, len_x, len_target):
+    def __init__(self, file_path, len_x, len_target, mmap=False):
         super().__init__()
 
         self.len_x = len_x
         self.len_target = len_target
 
-        self.tokenized, tok_meta = load_preprocessed_data(file_path)
-        self.data, data_meta = load_preprocessed_data(tok_meta['data_file'])
+        self.tokenized, tok_meta = load_preprocessed_data(file_path, mmap=mmap)
+        self.data, data_meta = load_preprocessed_data(tok_meta['data_file'], mmap=mmap)
         self.boundaries = data_meta['boundaries']
 
         len_y = tok_meta['len_y']
@@ -214,7 +215,7 @@ def define_loader(dataset, batch_size, n_samples, drop_last=True, num_workers=4,
                       num_workers=num_workers, pin_memory=pin_memory,
                       persistent_workers=num_workers > 0)
     
-def get_data_loader(file_path, len_x, len_y, batch_size, n_samples, drop_last=True):
+def get_data_loader(file_path, len_x, len_y, batch_size, n_samples, drop_last=True, mmap=False):
     """
     Params:
     file_path: path to preprocessed data
@@ -222,12 +223,13 @@ def get_data_loader(file_path, len_x, len_y, batch_size, n_samples, drop_last=Tr
     len_y: output length
     batch_size: batch size
     n_samples: how many random samples to draw for each epoch
+    mmap: see load_preprocessed_data
     """
-    dataset = EEGData(file_path, len_x, len_y)
+    dataset = EEGData(file_path, len_x, len_y, mmap=mmap)
 
     return define_loader(dataset, batch_size, n_samples, drop_last)
 
-def get_data_loader_tokenized_y(file_path, len_x, len_target, batch_size, n_samples):
+def get_data_loader_tokenized_y(file_path, len_x, len_target, batch_size, n_samples, mmap=False):
     """
     Params:
     file_path: path to tokenized targets
@@ -235,8 +237,9 @@ def get_data_loader_tokenized_y(file_path, len_x, len_target, batch_size, n_samp
     len_target: length of the training target
     batch_size: batch size
     n_samples: how many random samples to draw for each epoch
+    mmap: see load_preprocessed_data
     """
-    dataset = EEGDataTokenizedY(file_path, len_x, len_target)
+    dataset = EEGDataTokenizedY(file_path, len_x, len_target, mmap=mmap)
 
     return define_loader(dataset, batch_size, n_samples)
 
@@ -244,9 +247,9 @@ def get_dataloaders_for_training(args, len_target, is_rvq_model):
     data_class = EEGDataTokenizedY if is_rvq_model else EEGDataOverlapY
 
     def _loader(file_, n_samples, batch_size):
-        dataset = data_class(file_, args.len_x, len_target)
+        dataset = data_class(file_, args.len_x, len_target, mmap=args.mmap)
         return define_loader(dataset, batch_size, n_samples)
-    
+
     train_loader = _loader(args.train_data_source, args.n_train_samples, args.batch_size)
     val_loader = _loader(args.val_data_source, args.n_val_samples, args.val_batch_size)
 

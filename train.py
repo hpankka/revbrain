@@ -88,6 +88,7 @@ if __name__ == "__main__":
     parser.add_argument('run_dir', type=str, help='Where to save outputs')
     # Optional training args
     parser.add_argument('--device', type=str, default='cuda', help='Device to train on')
+    parser.add_argument('--mmap', action='store_true', help='Memory-map data from disk instead of loading it fully into RAM. Use this if the dataset does not fit in RAM')
     parser.add_argument('--len_x', type=int, default=2000, help='Input length')
     parser.add_argument('--n_train_samples', type=int, default=50_000, help='Number of training samples to be used per epoch')
     parser.add_argument('--n_val_samples', type=int, default=10_000, help='Number of validation samples to be used per epoch')

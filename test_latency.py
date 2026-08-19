@@ -118,7 +118,8 @@ if __name__ == "__main__":
     # RVQ-only
     untrained_parser.add_argument('--M', type=int, help='Number of codebook levels (RVQ models only)')
     untrained_parser.add_argument('--N', type=int, help='Codebook size (RVQ models only)')
-    untrained_parser.add_argument('--in_relat_enc', action=argparse.BooleanOptionalAction, default=True, help='Whether to apply input relative encoding')
+    untrained_parser.add_argument('--in_relat_enc', action=argparse.BooleanOptionalAction, default=True,
+                                  help='Whether to apply input relative encoding (default: True)')
     # Hyperparameters REVBrain and Tf-REVBrain
     untrained_parser.add_argument('--enc_channels', type=int, help='Number of hidden channels in the encoder')
     untrained_parser.add_argument('--enc_kernel', type=int, help='Kernel size of the encoder')

@@ -64,7 +64,8 @@ if __name__ == "__main__":
     parser.add_argument('data_file', type=str, help='Which data file to tokenize')
     parser.add_argument('codebook_dir', type=str, help='Which codebooks to use')
     parser.add_argument('output_name', type=str, help='Output file name (without extension), saved in the same folder as data_file')
-    parser.add_argument('--mmap', action='store_true', help='Memory-map data from disk instead of loading it fully into RAM. Use this if the dataset does not fit in RAM')
+    parser.add_argument('--mmap', action=argparse.BooleanOptionalAction, default=False,
+                        help='Memory-map data from disk (use if the dataset does not fit in RAM) (default: False, i.e. load into RAM)')
 
     args = parser.parse_args()
 

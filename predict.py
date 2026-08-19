@@ -137,14 +137,14 @@ if __name__ == "__main__":
                         help='Number of test windows to predict (default: 10000)')
     parser.add_argument('--batch_size', type=int, default=100)
     parser.add_argument('--device', type=str, default='cuda')
-    parser.add_argument('--mmap', action='store_true', help='Memory-map data from disk instead of loading it fully into RAM. Use this if the dataset does not fit in RAM')
-    parser.add_argument('--no_sampling', dest='sampling', action='store_false',
-                        help='Use argmax instead of sampling from the predicted distribution')
-    parser.set_defaults(sampling=True)
+    parser.add_argument('--mmap', action=argparse.BooleanOptionalAction, default=False,
+                        help='Memory-map data from disk (use if the dataset does not fit in RAM) (default: False, i.e. load into RAM)')
+    parser.add_argument('--sampling', action=argparse.BooleanOptionalAction, default=True,
+                        help='Sample from the predicted distribution (default). --no-sampling chooses argmax predictions.')
     parser.add_argument('--output_dir', type=str, default=None,
                         help='Where to save results (default: <run_dir>/predictions/)')
     parser.add_argument('--plot', action=argparse.BooleanOptionalAction, default=True,
-                        help='Whether to plot example predictions. Plots are saved to output_dir.')
+                        help='Plot example predictions and save to output_dir (default: True)')
 
     # WaveNet options
     parser.add_argument('--len_y', type=int, default=100,

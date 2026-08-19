@@ -3,6 +3,7 @@ import argparse
 
 from utils.data_utils import get_data_loader
 from training.train_codebooks import create_codebooks
+from utils.arg_checks import validate_codebook_args
 
 
 def launch_codebook_training(args):
@@ -38,5 +39,6 @@ if __name__ == "__main__":
                         help='Memory-map data from disk (use if the dataset does not fit in RAM) (default: False, i.e. load into RAM)')
     
     args = parser.parse_args()
+    validate_codebook_args(args)
     
     launch_codebook_training(args)

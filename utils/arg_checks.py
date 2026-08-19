@@ -57,6 +57,14 @@ def validate_preprocessing_args(args):
     if args.bp_filter_len <= 0:
         raise ValueError('Length of the band-pass filter should be >0')
 
+def validate_codebook_args(args):
+    check_file_exists(args.data_file, 'Provided data file')
+    if check_is_tokenized(args.data_file):
+        raise ValueError('Cannot use tokenized data to train codebooks')
+    for type_, arg in zip(('M', 'N', 'len_y', 'n_samples'), (args.M, args.N, args.len_y, args.n_samples)):
+        if arg < 1:
+            raise ValueError(f'{type_} should be >0, got {type_}={arg}')
+
 def validate_training_args(args, is_rvq):
     check_dir_not_created(args.run_dir)
     for type_, source_ in zip(('training', 'validation'), (args.train_data_source, args.val_data_source)):

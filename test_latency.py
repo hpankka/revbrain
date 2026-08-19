@@ -70,7 +70,6 @@ def get_model_dir(args):
         json.dump(config, f, indent=2)
     return tmp_dir, tmp_dir, config
 
-
 def resolve_codebook_args(args, config):
     """
     Fill in args.len_y and args.in_relat_enc.
@@ -97,8 +96,9 @@ def add_common_test_args(subparser):
                            help='Compile mode(s) for torch.compile (default: max-autotune)')
     subparser.add_argument('--n_samples', type=int, nargs='+', default=[10],
                            help='How many samples to use for measuring inference latency (default: 10)')
-    subparser.add_argument('--len_y', type=int, default=100, help='Length of the prediction horizon in time steps. Inferred from cb metadata for trained RVQ models.')
-    subparser.add_argument('--device', type=str, default='cuda', help='Device to run the test on')
+    subparser.add_argument('--len_y', type=int, default=100,
+                           help='Length of the prediction horizon in time steps. Inferred from cb metadata for trained RVQ models (default: 100).')
+    subparser.add_argument('--device', type=str, default='cuda', help='Device to run the test on (default: cuda)')
 
 
 if __name__ == "__main__":
@@ -116,8 +116,8 @@ if __name__ == "__main__":
     untrained_parser = subparsers.add_parser('untrained', help='Test the latency of a freshly initialized model')
     untrained_parser.add_argument('model', type=str, help='Name of the model to be tested')
     # RVQ-only
-    untrained_parser.add_argument('--M', type=int, help='Number of codebook levels (RVQ models only)')
-    untrained_parser.add_argument('--N', type=int, help='Codebook size (RVQ models only)')
+    untrained_parser.add_argument('--M', type=int, default=5, help='Number of codebook levels (RVQ models only) (default: 5)')
+    untrained_parser.add_argument('--N', type=int, default=512, help='Codebook size (RVQ models only) (default: 5)')
     untrained_parser.add_argument('--in_relat_enc', action=argparse.BooleanOptionalAction, default=True,
                                   help='Whether to apply input relative encoding (default: True)')
     # Hyperparameters REVBrain and Tf-REVBrain

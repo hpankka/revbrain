@@ -138,7 +138,7 @@ if __name__ == "__main__":
     parser.add_argument('--high_freq', type=float, default=13.0, help='Upper bandpass frequency (Hz) (default: 13.0)')
     parser.add_argument('--bp_filter_len', type=int, default=128, help='Length of the band-pass filter (default: 128)')
     parser.add_argument('--eyes', type=str, default='open', choices=['open', 'closed'],
-                        help='Eyes condition to extract')
+                        help='Eyes condition to extract (default: open)')
     parser.add_argument('--channels', type=str, nargs='*', default=None,
                         help='Channels to include (default: all channels)')
 

@@ -62,7 +62,7 @@ if __name__ == "__main__":
     parser.add_argument('test_type', type=str, nargs='+', choices=['mae', 'phase_detection'],
                         help='Type of tests to be run')
     parser.add_argument('prediction_dir', type=str, default=None,
-                        help='Where predictions to be tested are saved')
+                        help='Path to dir containing the predictions that the metrics should be calculated for')
     parser.add_argument('--plot', action=argparse.BooleanOptionalAction, default=True,
                         help='Plot the results and save to prediction_dir (default: True)')
     parser.add_argument('--detection_ts', type=int, default=66,

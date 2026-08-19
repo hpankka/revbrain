@@ -17,7 +17,6 @@ torch.backends.cudnn.allow_tf32 = True          # cuDNN gate (convs)
 
 TRAIN_ARGS = {'train_data_source', 'run_dir', 'batch_size', 'val_batch_size', 'epochs', 'lr'}
 
-
 def setup_training_config(args):
 
     config = {'model': args.model, 'device': args.device}
@@ -43,7 +42,6 @@ def setup_training_config(args):
     config['model_config'] = model_config
 
     return config
-
 
 def launch_training(args):
     is_rvq = args.model in RVQ_MODELS
@@ -87,15 +85,16 @@ if __name__ == "__main__":
     parser.add_argument('val_data_source', type=str, help='Path to validation data')
     parser.add_argument('run_dir', type=str, help='Where to save outputs')
     # Optional training args
-    parser.add_argument('--device', type=str, default='cuda', help='Device to train on')
-    parser.add_argument('--mmap', action='store_true', help='Memory-map data from disk instead of loading it fully into RAM. Use this if the dataset does not fit in RAM')
-    parser.add_argument('--len_x', type=int, default=2000, help='Input length')
-    parser.add_argument('--n_train_samples', type=int, default=50_000, help='Number of training samples to be used per epoch')
-    parser.add_argument('--n_val_samples', type=int, default=10_000, help='Number of validation samples to be used per epoch')
-    parser.add_argument('--batch_size', type=int, default=32, help='Training batch size')
-    parser.add_argument('--val_batch_size', type=int, default=500, help='Validation batch size')
-    parser.add_argument('--epochs', type=int, default=500, help='Number of epochs to train')
-    parser.add_argument('--lr', type=float, default=0.001, help='Learning rate')
+    parser.add_argument('--device', type=str, default='cuda', help='Device to train on (default: cuda)')
+    parser.add_argument('--mmap', action=argparse.BooleanOptionalAction, default=False,
+                        help='Memory-map data from disk (use if the dataset does not fit in RAM) (default: False, i.e. load into RAM)')
+    parser.add_argument('--len_x', type=int, default=2000, help='Input length (default: 2000)')
+    parser.add_argument('--n_train_samples', type=int, default=50_000, help='Number of training samples to be used per epoch (default: 50_000)')
+    parser.add_argument('--n_val_samples', type=int, default=10_000, help='Number of validation samples to be used per epoch (default: 10_000)')
+    parser.add_argument('--batch_size', type=int, default=32, help='Training batch size (default: 32)')
+    parser.add_argument('--val_batch_size', type=int, default=500, help='Validation batch size (default: 500)')
+    parser.add_argument('--epochs', type=int, default=500, help='Number of epochs to train (default: 500)')
+    parser.add_argument('--lr', type=float, default=0.001, help='Learning rate (default: 0.001)')
     # Hyperparameters REVBrain and Tf-REVBrain
     parser.add_argument('--enc_channels', type=int, help='Number of hidden channels in the encoder')
     parser.add_argument('--enc_kernel', type=int, help='Kernel size of the encoder')

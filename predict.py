@@ -129,14 +129,13 @@ if __name__ == "__main__":
                         help='Directory of the trained model run (must contain training_config.json and model.pth)')
     parser.add_argument('test_data_source', type=str,
                         help='Path to preprocessed test data (.pt file)')
-
     # General options
     parser.add_argument('--n_samples', type=int, default=10,
                         help='Prediction samples to draw per input (default: 10)')
     parser.add_argument('--n_test_windows', type=int, default=10000,
                         help='Number of test windows to predict (default: 10000)')
-    parser.add_argument('--batch_size', type=int, default=100)
-    parser.add_argument('--device', type=str, default='cuda')
+    parser.add_argument('--batch_size', type=int, default=100, help='Batch size (default: 100)')
+    parser.add_argument('--device', type=str, default='cuda', help='Device (default: cuda)')
     parser.add_argument('--mmap', action=argparse.BooleanOptionalAction, default=False,
                         help='Memory-map data from disk (use if the dataset does not fit in RAM) (default: False, i.e. load into RAM)')
     parser.add_argument('--sampling', action=argparse.BooleanOptionalAction, default=True,
@@ -145,10 +144,9 @@ if __name__ == "__main__":
                         help='Where to save results (default: <run_dir>/predictions/)')
     parser.add_argument('--plot', action=argparse.BooleanOptionalAction, default=True,
                         help='Plot example predictions and save to output_dir (default: True)')
-
     # WaveNet options
     parser.add_argument('--len_y', type=int, default=100,
-                        help='Prediction horizon in timesteps (WaveNet only; read from codebook for RVQ models)')
+                        help='Prediction horizon in timesteps (WaveNet only; read from codebook for RVQ models) (default: 100)')
 
     args = parser.parse_args()
 

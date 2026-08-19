@@ -112,7 +112,7 @@ def validate_test_metrics_args(args, meta):
                 f"detection_ts must be in [0, {max_ts}) given len_y={meta['len_y']}, got {args.detection_ts}."
             )
 
-def validate_test_latency_args(args, is_untrained_rvq):
+def validate_test_latency_args(args):
     if 'pipeline_latency' in args.test_type:
         check_cuda(args, required=True)
     else:
@@ -126,11 +126,3 @@ def validate_test_latency_args(args, is_untrained_rvq):
     if args.mode == 'trained':
         check_dir_exists(args.run_dir, 'run_dir')
         check_file_exists(os.path.join(args.run_dir, 'training_config.json'), 'Required')
-
-    elif is_untrained_rvq:
-        if args.M is None or args.N is None:
-            raise ValueError(f"--M and --N are required to build an untrained '{args.model}' model")
-        if args.M < 1 or args.N < 1:
-            raise ValueError(f'--M and --N must be >= 1, got M={args.M}, N={args.N}')
-    elif args.M is not None or args.N is not None:
-        warnings.warn(f"--M/--N are ignored for '{args.model}' (not an RVQ model)", UserWarning)

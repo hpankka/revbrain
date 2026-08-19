@@ -141,8 +141,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    is_untrained_rvq = args.mode == 'untrained' and args.model in RVQ_MODELS
-    validate_test_latency_args(args, is_untrained_rvq)
+    validate_test_latency_args(args)
 
     model_dir, tmp_dir, config = get_model_dir(args)
     resolve_codebook_args(args, config)

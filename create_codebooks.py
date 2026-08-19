@@ -25,7 +25,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # Required path arguments
-    parser.add_argument('data_file', type=str, help='Path to desired train data file')
+    parser.add_argument('data_file', type=str, help='Path to a preprocessed data file to be used to train the codebooks')
     parser.add_argument('codebook_dir', type=str, help='Where to save the codebooks')
     # Optional codebook hyperparameters
     parser.add_argument('--M', type=int, default=5, help='Number of codebook levels')

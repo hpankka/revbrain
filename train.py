@@ -5,7 +5,7 @@ import json
 
 import torch
 
-from utils.arg_checks import validate_training_args
+from utils.arg_checks import validate_training_args, validate_input_size
 from utils.model_utils import get_model, RVQ_MODELS, MODEL_CONFIGS
 from utils.data_utils import get_dataloaders_for_training
 from training.train_loop import train_loop
@@ -61,10 +61,7 @@ def launch_training(args):
         print('Compiled model with torch.compile')
 
     rf = model.receptive_field_size
-
-    # Check that provided input length is enough for model
-    if args.len_x < rf:
-        raise ValueError(f'len_x must be at least the receptive field size ({rf} with current model params)')
+    validate_input_size(args.len_x, rf)
 
     # Set up data loaders
     len_target = args.len_x - rf + 1

@@ -42,6 +42,10 @@ def check_data_type(path, is_rvq):
     if not is_rvq and is_tokenized:
         raise ValueError(f"WaveNet requires signal data, but '{path}' is RVQ tokenized data.")
 
+def validate_input_size(len_x, rf):
+    if len_x < rf:
+        raise ValueError(f'len_x must be at least the receptive field size ({rf} with current model params)')
+
 def validate_preprocessing_args(args):
     check_dir_exists(args.data_path, 'EEG data path')
 

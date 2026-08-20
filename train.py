@@ -95,23 +95,23 @@ if __name__ == "__main__":
     parser.add_argument('--val_batch_size', type=int, default=500, help='Validation batch size (default: 500)')
     parser.add_argument('--epochs', type=int, default=500, help='Number of epochs to train (default: 500)')
     parser.add_argument('--lr', type=float, default=0.001, help='Learning rate (default: 0.001)')
-    # Hyperparameters REVBrain and Tf-REVBrain
-    parser.add_argument('--enc_channels', type=int, help='Number of hidden channels in the encoder')
-    parser.add_argument('--enc_kernel', type=int, help='Kernel size of the encoder')
-    parser.add_argument('--enc_blocks', type=int, help='Number of causal cnn blocks in the encoder')
-    # Hyperparameters REVBrain
-    parser.add_argument('--z_dim', type=int, help='Dimension of the input representation')
-    parser.add_argument('--embedding_dim', type=int, help='Embedding dimension')
-    parser.add_argument('--mlp_hidden_dim', type=int, help='Hidden dimension of the MLP head')
-    # Hyperparameters Tf-REVBrain
-    parser.add_argument('--d_model', type=int, help='Dimension of the Transformer model')
-    parser.add_argument('--n_head', type=int, help='Number of Transformer heads')
-    parser.add_argument('--n_transformer_layers', type=int, help='Number of Transformer layers')
-    parser.add_argument('--d_transformer_ff', type=int, help='Dimension of Transformer feedforward')
+    # Hyperparameters REVBRAIN and TF-REVBRAIN
+    parser.add_argument('--enc_channels', type=int, help='Number of hidden channels in the encoder (RVQ models only)')
+    parser.add_argument('--enc_kernel', type=int, help='Kernel size of the encoder (RVQ models only)')
+    parser.add_argument('--enc_blocks', type=int, help='Number of causal CNN blocks in the encoder (RVQ models only)')
+    # Hyperparameters REVBRAIN
+    parser.add_argument('--z_dim', type=int, help='Dimension of the input representation (REVBRAIN only)')
+    parser.add_argument('--embedding_dim', type=int, help='Embedding dimension (REVBRAIN only)')
+    parser.add_argument('--mlp_hidden_dim', type=int, help='Hidden dimension of the MLP head (REVBRAIN only)')
+    # Hyperparameters TF-REVBRAIN
+    parser.add_argument('--d_model', type=int, help='Dimension of the Transformer model (TF-REVBRAIN only)')
+    parser.add_argument('--n_head', type=int, help='Number of Transformer heads (TF-REVBRAIN only)')
+    parser.add_argument('--n_transformer_layers', type=int, help='Number of Transformer layers (TF-REVBRAIN only)')
+    parser.add_argument('--d_transformer_ff', type=int, help='Dimension of Transformer feedforward (TF-REVBRAIN only)')
     # Hyperparameters WaveNet
-    parser.add_argument('--n_channels', type=int, help='Number of hidden channels')
-    parser.add_argument('--kernel_size', type=int, help='Kernel size')
-    parser.add_argument('--n_blocks', type=int, help='Number of causal cnn blocks')
+    parser.add_argument('--n_channels', type=int, help='Number of hidden channels (WaveNet only)')
+    parser.add_argument('--kernel_size', type=int, help='Kernel size (WaveNet only)')
+    parser.add_argument('--n_blocks', type=int, help='Number of causal CNN blocks (WaveNet only)')
     
     args = parser.parse_args()
 

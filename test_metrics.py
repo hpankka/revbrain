@@ -51,7 +51,8 @@ def run_phase_detection():
 
     if args.plot:
         fig = plot_recall_precision(precision, recall, thresholds)
-        fig.savefig(os.path.join(args.prediction_dir, 'precision_recall.png'), dpi=600)
+        fig.savefig(os.path.join(args.prediction_dir,
+                                 f'precision_recall_ts={args.detection_ts}.png'), dpi=600)
         plt.close(fig)
 
 
@@ -66,7 +67,7 @@ if __name__ == "__main__":
     parser.add_argument('--plot', action=argparse.BooleanOptionalAction, default=True,
                         help='Plot the results and save to prediction_dir (default: True)')
     parser.add_argument('--detection_ts', type=int, default=66,
-                        help='Time stamp to be used for phase detection '
+                        help='Time stamp to be used for phase detection'
                         '(default: 66, corresponding to 6 ms in the future with sampling rate of 500 Hz and filter length of 128)')
     parser.add_argument('--preprocessing_chunk_size', type=int, default=2000,
                         help='Chunk size used for preprocessing the data for phase detection. Adjust to fit your memory resources (default: 2000).')

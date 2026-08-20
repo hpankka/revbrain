@@ -17,7 +17,7 @@ torch.backends.cudnn.allow_tf32 = True          # cuDNN gate (convs)
 
 TRAIN_ARGS = {'train_data_source', 'run_dir', 'batch_size', 'val_batch_size', 'epochs', 'lr'}
 
-def setup_training_config(args):
+def setup_training_config(args, is_rvq):
 
     config = {'model': args.model, 'device': args.device}
 
@@ -28,7 +28,7 @@ def setup_training_config(args):
     # Set up model config
     model_config = dict(MODEL_CONFIGS.get(args.model, {}))
 
-    if args.model in RVQ_MODELS:  # add M and N to RVQ models
+    if is_rvq:  # add M and N to RVQ models
         meta_path = args.train_data_source.replace('.pt', '_meta_data.json')
         with open(meta_path, 'r') as f:
             meta = json.load(f)
@@ -43,12 +43,10 @@ def setup_training_config(args):
 
     return config
 
-def launch_training(args):
-    is_rvq = args.model in RVQ_MODELS
-    validate_training_args(args, is_rvq)
-
+def launch_training(args, is_rvq):
+    
     # Set up and save training config
-    config = setup_training_config(args)
+    config = setup_training_config(args, is_rvq)
     print(f'Creating output directory {args.run_dir}...')
     os.makedirs(args.run_dir)
     with open(os.path.join(args.run_dir, 'training_config.json'), 'wt') as f:
@@ -111,5 +109,8 @@ if __name__ == "__main__":
     parser.add_argument('--n_blocks', type=int, help='Number of causal CNN blocks (WaveNet only)')
     
     args = parser.parse_args()
+
+    is_rvq = args.model in RVQ_MODELS
+    validate_training_args(args, is_rvq)
 
     launch_training(args)

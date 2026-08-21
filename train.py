@@ -7,7 +7,7 @@ import torch
 
 from utils.arg_checks import validate_training_args, validate_input_size
 from utils.model_utils import get_model, RVQ_MODELS, MODEL_CONFIGS
-from utils.data_utils import get_dataloaders_for_training
+from utils.data_utils import get_dataloaders_for_training, load_metadata
 from training.train_loop import train_loop
 
 torch.set_float32_matmul_precision('high')      # enables TF32 for matmuls
@@ -25,11 +25,9 @@ def setup_training_config(args, is_rvq):
 
     # Query cb path and data path
     if is_rvq:
-        meta_path = args.train_data_source.replace('.pt', '_meta_data.json')
-        with open(meta_path, 'r') as f:
-            meta = json.load(f)
-        config['codebook_dir'] = meta['codebook_dir']
-        data_path = meta['data_file']
+        tokenized_meta = load_metadata(args.train_data_source)
+        config['codebook_dir'] = tokenized_meta['codebook_dir']
+        data_path = tokenized_meta['data_file']
     else:
         data_path = args.train_data_source
 
@@ -42,7 +40,7 @@ def setup_training_config(args, is_rvq):
 
     # Add M and N to RVQ models
     if is_rvq:  
-        model_config.update({'M': meta['M'], 'N': meta['N']})
+        model_config.update({'M': tokenized_meta['M'], 'N': tokenized_meta['N']})
 
     # Replace default values with CLI args
     for key in model_config:
@@ -53,9 +51,7 @@ def setup_training_config(args, is_rvq):
     config['model_config'] = model_config
 
     # Dump essential data properties to config in case data gets deleted
-    data_meta_path = data_path.replace('.pt', '_meta_data.json')
-    with open(data_meta_path, 'r') as f:
-        data_meta = json.load(f)
+    data_meta = load_metadata(data_path)
     config['data_properties'] = {k: data_meta[k] for k in DATA_PROPERTY_KEYS}
 
     return config

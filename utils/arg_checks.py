@@ -1,9 +1,8 @@
 import os
-import json
 import warnings
 import torch
 
-from utils.data_utils import get_group_delay
+from utils.data_utils import get_group_delay, load_metadata
 
 
 # ----------Argument validation----------
@@ -30,9 +29,7 @@ def check_cuda(args, required=False):
             warnings.warn('CUDA not available, falling back to CPU', UserWarning)
 
 def check_is_tokenized(path):
-    meta_path = path.replace('.pt', '_meta_data.json')
-    with open(meta_path, 'r') as f:
-        meta = json.load(f)
+    meta = load_metadata(path)
     return 'data_file' in meta
 
 def check_data_type(path, is_rvq):

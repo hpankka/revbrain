@@ -99,14 +99,15 @@ def vector_quantize(cb_model, y):
 
 # ----------Datasets----------
 
-def load_preprocessed_data(file_path, mmap=False):
-
-    data = torch.load(file_path, mmap=mmap)
-
+def load_metadata(file_path):
     meta_path = file_path.replace('.pt', '_meta_data.json')
     with open(meta_path, 'r') as f:
         meta = json.load(f)
+    return meta
 
+def load_preprocessed_data(file_path, mmap=False):
+    data = torch.load(file_path, mmap=mmap)
+    meta = load_metadata(file_path)
     return data, meta
 
 class EEGData(Dataset):

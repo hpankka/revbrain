@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 from utils.arg_checks import check_cuda, validate_predict_args
 from utils.model_utils import load_run, run_rvq_inference, RVQ_MODELS
-from utils.data_utils import get_codebooks_tensor, get_data_loader
+from utils.data_utils import get_codebooks_tensor, get_data_loader, load_metadata
 from utils.plotting import plot_predictions
 
 
@@ -40,13 +40,10 @@ def predict(args):
                                   drop_last=False,
                                   mmap=args.mmap)
     
-    test_data_meta_path = args.test_data_source.replace('.pt', '_meta_data.json')
-    with open(test_data_meta_path) as f:
-        test_data_meta = json.load(f)
-
     # Create output dir and save metadata
     print(f'Creating output directory {args.output_dir}...')
     os.makedirs(args.output_dir)
+    test_data_meta = load_metadata(args.test_data_source)
     meta = {
         'model':            config['model'],
         'run_dir':          args.run_dir,

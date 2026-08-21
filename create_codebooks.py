@@ -14,8 +14,8 @@ def launch_codebook_training(args):
     data_loader = get_data_loader(args.data_file,
                                   len_x=1,
                                   len_y=args.len_y,
-                                  batch_size=args.n_samples,
-                                  n_samples=args.n_samples,
+                                  batch_size=args.n_train_samples,
+                                  n_samples=args.n_train_samples,
                                   mmap=args.mmap)
     
     print(f"Creating {args.M} codebooks of size {args.N}...\n")
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     parser.add_argument('--M', type=int, default=5, help='Number of codebook levels (default: 5)')
     parser.add_argument('--N', type=int, default=512, help='Size of each codebook (default: 512)')
     parser.add_argument('--len_y', type=int, default=100, help='Length of the prediction horizon in time steps (default: 100)')
-    parser.add_argument('--n_samples', type=int, default=50_000, help='Number of training samples (default: 50_000)')
+    parser.add_argument('--n_train_samples', type=int, default=50_000, help='Number of training samples (default: 50_000)')
     parser.add_argument('--in_relat_enc', action=argparse.BooleanOptionalAction, default=True,
                         help='Whether to apply input relative encoding (default: True)')
     parser.add_argument('--mmap', action=argparse.BooleanOptionalAction, default=False,

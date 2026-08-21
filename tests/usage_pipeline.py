@@ -186,6 +186,7 @@ def usage_pipeline():
 
         totals.append((time.perf_counter() - t0) * 1000)
 
+    print(f'\nPipeline latencies with compile_mode={args.compile_mode}:')
     print('\nTotal latency:')
     print_totals_summary(totals)
 

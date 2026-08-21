@@ -10,7 +10,7 @@ import sys
 import itertools
 
 from utils.model_utils import RVQ_MODELS, MODEL_CONFIGS, load_training_config
-from utils.data_utils import get_codebook_dir_from_config, load_codebooks
+from utils.data_utils import load_codebooks
 from utils.arg_checks import validate_test_latency_args
 
 
@@ -81,7 +81,7 @@ def resolve_codebook_args(args, config):
     to non-RVQ models, so it's defaulted to False there.
     """
     if args.mode == 'trained' and config['model'] in RVQ_MODELS:
-        codebook_dir = get_codebook_dir_from_config(config)
+        codebook_dir = config['codebook_dir']
         _, cb_meta = load_codebooks(codebook_dir)
         args.len_y = cb_meta['len_y']
         args.in_relat_enc = cb_meta['in_relat_enc']

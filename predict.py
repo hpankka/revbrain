@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 from utils.arg_checks import check_cuda, validate_predict_args
 from utils.model_utils import load_run, run_rvq_inference, RVQ_MODELS
-from utils.data_utils import get_codebook_dir_from_config, get_codebooks_tensor, get_data_loader
+from utils.data_utils import get_codebooks_tensor, get_data_loader
 from utils.plotting import plot_predictions
 
 
@@ -23,7 +23,7 @@ def predict(args):
     # Load codebooks
     codebooks, cb_meta = None, None
     if is_rvq:
-        codebook_dir = get_codebook_dir_from_config(config)
+        codebook_dir = config['codebook_dir']
         codebooks, cb_meta = get_codebooks_tensor(codebook_dir)
         codebooks = codebooks.to(device)
         len_y = cb_meta['len_y']

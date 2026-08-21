@@ -17,29 +17,46 @@ torch.backends.cudnn.allow_tf32 = True          # cuDNN gate (convs)
 
 TRAIN_ARGS = {'train_data_source', 'run_dir', 'batch_size', 'val_batch_size', 'epochs', 'lr'}
 
+DATA_PROPERTY_KEYS = ('low_freq', 'high_freq', 'bp_filter_len', 'fs', 'eyes', 'channels', 'sub_ids')
+
 def setup_training_config(args, is_rvq):
 
     config = {'model': args.model, 'device': args.device}
+
+    # Query cb path and data path
+    if is_rvq:
+        meta_path = args.train_data_source.replace('.pt', '_meta_data.json')
+        with open(meta_path, 'r') as f:
+            meta = json.load(f)
+        config['codebook_dir'] = meta['codebook_dir']
+        data_path = meta['data_file']
+    else:
+        data_path = args.train_data_source
 
     # Set up training config
     train_config = {k: v for k, v in vars(args).items() if k in TRAIN_ARGS}
     config['train_config'] = train_config
 
-    # Set up model config
+    # Get default model config
     model_config = dict(MODEL_CONFIGS.get(args.model, {}))
 
-    if is_rvq:  # add M and N to RVQ models
-        meta_path = args.train_data_source.replace('.pt', '_meta_data.json')
-        with open(meta_path, 'r') as f:
-            meta = json.load(f)
+    # Add M and N to RVQ models
+    if is_rvq:  
         model_config.update({'M': meta['M'], 'N': meta['N']})
 
+    # Replace default values with CLI args
     for key in model_config:
         cli_val = getattr(args, key, None)
         if cli_val is not None:
             model_config[key] = cli_val
 
     config['model_config'] = model_config
+
+    # Dump essential data properties to config in case data gets deleted
+    data_meta_path = data_path.replace('.pt', '_meta_data.json')
+    with open(data_meta_path, 'r') as f:
+        data_meta = json.load(f)
+    config['data_properties'] = {k: data_meta[k] for k in DATA_PROPERTY_KEYS}
 
     return config
 

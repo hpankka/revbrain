@@ -35,7 +35,7 @@ def print_latency_summary(times, args):
     median = np.median(times)
     p1, p99 = np.percentile(times, [1, 99])
 
-    print(f'Latency stats for compile_mode={args.compile_mode} and n_samples={args.n_samples}: \n '
+    print(f'\nLatency stats for compile_mode={args.compile_mode} and n_samples={args.n_samples}: \n '
           f'\t median: {median:.3f} ms \n \t p1: {p1:.3f} ms \n \t p99: {p99:.3f} ms')
 
 def measure_latencies(args):

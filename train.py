@@ -126,4 +126,4 @@ if __name__ == "__main__":
     is_rvq = args.model in RVQ_MODELS
     validate_training_args(args, is_rvq)
 
-    launch_training(args)
+    launch_training(args, is_rvq)

@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 def plot_predictions(samples, inputs, gts):
     n_samples = samples.shape[1]
     alpha = np.interp(n_samples, [10, 100], [0.2, 0.05])
+    input_len = 250
 
     font_s = 16
     plt.rcParams.update({'font.size': font_s})
@@ -12,13 +13,13 @@ def plot_predictions(samples, inputs, gts):
     fig, axes = plt.subplots(1, 3, figsize=(16.5, 3.8), sharey=True)
 
     for ax, samples_, input, gt in zip(axes, samples, inputs, gts):
-        input = input[-250:]
+        input = input[-input_len:]
 
         gt = np.concatenate([input, gt])
         len_ = gt.shape[0]*2
         len_pred = samples_.shape[1]*2
-        time_axis = np.arange(0, len_, 2)
-        predicted_time = np.arange(len_-len_pred, len_, 2)
+        time_axis = np.arange(-input_len*2, len_-input_len*2, 2)
+        predicted_time = np.arange(len_-len_pred-input_len*2, len_-input_len*2, 2)
 
         ax.plot(time_axis, gt, c='black', linewidth=2.5)
         ax.plot(predicted_time, samples_.T, alpha=alpha, c='purple', linewidth=2.5)

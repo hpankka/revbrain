@@ -102,8 +102,8 @@ uv run python train.py wavenet \
 ```
 
 Expected training time (on a H200 GPU) and memory consumption with default training and model configurations:
-* REVBRAIN:
-* TF-REVBRAIN: 
+* REVBRAIN: 5h, 16GB
+* TF-REVBRAIN: 21h 10m, 15GB
 * WaveNet: 2h 45m, 12GB
 
 

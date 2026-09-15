@@ -82,7 +82,7 @@ class REVBrain(nn.Module):
         else:
             batch_size *= n_samples
 
-            z = self.encoder(x[:, :, -self.receptive_field_size:])  # (n, N, 1)
+            z = self.encoder(x[:, :, -self.receptive_field_size:])  # (n, z_dim, 1)
 
             embedded_ys = torch.empty(batch_size, 0, 1).to(self.device)
             out = [torch.empty(batch_size, 0, dtype=torch.long).to(self.device)]

@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     # Required path arguments
     parser.add_argument('data_file', type=str, help='Path to a preprocessed data file to be used to train the codebooks')
-    parser.add_argument('codebook_dir', type=str, help='Where to save the codebooks')
+    parser.add_argument('codebook_dir', type=str, help='Where to save the codebooks (dir must not exist)')
     # Optional codebook hyperparameters
     parser.add_argument('--M', type=int, default=5, help='Number of codebook levels (default: 5)')
     parser.add_argument('--N', type=int, default=512, help='Size of each codebook (default: 512)')

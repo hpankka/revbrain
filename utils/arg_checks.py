@@ -62,7 +62,7 @@ def validate_codebook_args(args):
     check_file_exists(args.data_file, 'Provided data file')
     if check_is_tokenized(args.data_file):
         raise ValueError('Cannot use tokenized data to train codebooks')
-    for type_, arg in zip(('M', 'N', 'len_y', 'n_samples'), (args.M, args.N, args.len_y, args.n_samples)):
+    for type_, arg in zip(('M', 'N', 'len_y', 'n_train_samples'), (args.M, args.N, args.len_y, args.n_train_samples)):
         if arg < 1:
             raise ValueError(f'{type_} should be >0, got {type_}={arg}')
 

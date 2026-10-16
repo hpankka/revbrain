@@ -9,16 +9,19 @@ link-to-paper-here<br>
 
 ## Prerequisites
 * Python package and project manager [uv](https://docs.astral.sh/uv/) installed
-* GPU (recommended; the code will run on a CPU, but training will be slow)
+* Recommended: NVIDIA GPU supported by the cu128 PyTorch build, i.e. [compute capability](https://developer.nvidia.com/cuda/gpus) 7.0–12.x (e.g. V100 / T4 / RTX 20xx–50xx / A100 / H100), with driver version >=525
+    * The code will run on a CPU (with the exception of the `pipeline_latency`-test), but training will be slow
 
 
 ## Setup
-Clone the project and from the repo root, run:
+Clone the project and from the repo root, run one of the following, depending on your hardware:
 
 ```bash
-uv sync
+uv sync --extra cu128   # PyTorch with CUDA 12.8
+uv sync --extra cpu     # CPU-only PyTorch: use when your machine doesn't have a GPU that cu128 supports
 ```
-This creates .venv/ and installs all locked dependencies.
+
+This creates .venv/ and installs all locked dependencies. Note: do not omit the `--extra`, as a plain `uv sync` does not install PyTorch at all, and will remove it from an existing environment.
 
 
 ## Usage
@@ -103,7 +106,7 @@ uv run python train.py wavenet \
     --n_channels=16
 ```
 
-Expected training time (on a H200 GPU) and memory consumption with default training and model configurations:
+Expected training time (on an H200 GPU) and memory consumption with default training and model configurations:
 * REVBRAIN: 5h, 16GB
 * TF-REVBRAIN: 21h 10m, 15GB
 * WaveNet: 2h 45m, 12GB

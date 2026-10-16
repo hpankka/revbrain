@@ -1,7 +1,7 @@
 ## REVBRAIN for real-time EEG forecasting &mdash; PyTorch implementation
 ![Prediction example](predictions.png)
 
-**Waves of a feather flock together: Real-time probabilistic EEG forecasting using residual vector quantization** (2026)<br>
+**REVBRAIN: Real-time probabilistic EEG forecasting** (2026)<br>
 Hanna Pankka¹, Jaakko Lehtinen¹², Timo Roine¹<br>
 ¹Aalto University, ²NVIDIA<br>
 link-to-paper-here<br>
@@ -36,8 +36,10 @@ uv run python script_name.py --help
 
 ## 1 Data preprocessing
 The preprocessing step extracts the requested subjects and data conditions and applies band-pass filtering. To use the same data and apply the same preprocessing as in the article:
-1. Download the dataset d003 (Cavanagh et al., 2019) from the [PRED+CT repository](https://predict.cs.unm.edu/)
-2. Run:
+1. Download the dataset from the [PRED+CT repository](https://predict.cs.unm.edu/):
+    * From the Download tab, choose the dataset d003 "Depression Rest" (Cavanagh et al., 2019)
+    * From the directory, download the EEG recordings under the "Matlab Files"-folder and place them to a folder of your choosing
+2. Run the following (replace 'path/to/EEGdata' with the folder path you chose in the previous step):
 ```bash
 for opt in 'train' 'val' 'test'; do
     uv run python preprocess_data.py \

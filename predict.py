@@ -129,8 +129,8 @@ if __name__ == "__main__":
     # General options
     parser.add_argument('--n_samples', type=int, default=10,
                         help='Prediction samples to draw per input (default: 10)')
-    parser.add_argument('--n_test_windows', type=int, default=10000,
-                        help='Number of test windows to predict (default: 10000)')
+    parser.add_argument('--n_test_windows', type=int, default=250000,
+                        help='Number of test windows to predict (default: 250000)')
     parser.add_argument('--batch_size', type=int, default=100, help='Batch size (default: 100)')
     parser.add_argument('--device', type=str, default='cuda', help='Device (default: cuda)')
     parser.add_argument('--mmap', action=argparse.BooleanOptionalAction, default=False,

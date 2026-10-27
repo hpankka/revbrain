@@ -149,7 +149,7 @@ For testing the inference latencies, we offer two testing modes:
 
 as well as two test types: 
 * `inference_latency` measures the pure inference latency of the model. Use the `--n_samples` argument to control how many samples should be drawn per input.
-* `pipeline_latency` measures the latency of the example modeling pipeline presented in the article
+* `pipeline_latency` measures the latency of the example modeling pipeline presented in the article (Note: this test requires CUDA)
 
 For the most reliable results, run the latency tests with the power cord on, external display unplugged, and all other applications closed.
 

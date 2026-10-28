@@ -1,7 +1,7 @@
 ## REVBRAIN for real-time EEG forecasting &mdash; PyTorch implementation
 ![Prediction example](predictions.png)
 
-**REVBRAIN: Real-time probabilistic EEG forecasting** (2026)<br>
+**REVBRAIN: Real-time Probabilistic EEG Forecasting Using Residual Vector Quantization** (2026)<br>
 Hanna Pankka¹, Jaakko Lehtinen¹², Timo Roine¹<br>
 ¹Aalto University, ²NVIDIA<br>
 link-to-paper-here<br>

@@ -4,7 +4,7 @@
 **REVBRAIN: Real-time Probabilistic EEG Forecasting Using Residual Vector Quantization** (2026)<br>
 Hanna Pankka¹, Jaakko Lehtinen¹², Timo Roine¹<br>
 ¹Aalto University, ²NVIDIA<br>
-link-to-paper-here<br>
+https://arxiv.org/abs/2610.38558<br>
 
 
 ## Prerequisites
@@ -172,8 +172,14 @@ uv run python test_latency.py untrained \
 
 
 ## Citation
-APA <br>
-bibtex
+```
+@article{pankka2026,
+  title={{REVBRAIN}: Real-time Probabilistic {EEG} Forecasting Using Residual Vector Quantization},
+  author={Pankka, Hanna and Lehtinen, Jaakko and Roine, Timo},
+  journal={arXiv preprint arXiv:2610.38558},
+  year={2026}
+}
+```
 
 
 ## Acknowledgments
